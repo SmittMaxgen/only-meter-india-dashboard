@@ -345,7 +345,7 @@ export default function Sidebar({ isOpen, onClose }) {
             icon: ClipboardDocumentListIcon,
             children: [
               {
-                label: "Cab Booking",
+                label: "Car Booking",
                 to: "/dashboard/cab-booking",
                 icon: ClipboardDocumentListIcon,
               },
