@@ -498,6 +498,16 @@ export default function Sidebar({ isOpen, onClose }) {
         title: "SERVICE MANAGEMENT",
         items: [{ label: "Banner", to: "/dashboard/banner", icon: TicketIcon }],
       },
+      {
+        title: "VEHICLE FARE",
+        items: [
+          {
+            label: "Vehicle Fare",
+            to: "/dashboard/vehicle-fare",
+            icon: TicketIcon,
+          },
+        ],
+      },
     ],
     [],
   );

@@ -21,6 +21,7 @@ import InterCityHistory from "../Pages/InterCityHistory.jsx";
 import ReservedBooking from "../Pages/ReservedBooking.jsx";
 import RentalRides from "../Pages/RentalRides.jsx";
 import WorkInProgress from "../Pages/WorkInProgress.jsx";
+import VehicleFare from "../Pages/VehicleFare.jsx";
 import VehicleBrand from "../Pages/vehicleBrand.jsx";
 import VehicleModel from "../Pages/VehicleModel.jsx";
 import VehicleType from "../Pages/VehicleType.jsx";
@@ -80,6 +81,7 @@ export const router = createBrowserRouter([
           { path: "rental-package", element: <RentalPackage /> },
           { path: "support-ticket", element: <SupportTicket /> },
           { path: "work", element: <WorkInProgress /> },
+          { path: "vehicle-fare", element: <VehicleFare /> },
           { path: "*", element: <WorkInProgress /> },
         ],
       },
