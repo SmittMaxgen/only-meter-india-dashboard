@@ -863,7 +863,7 @@ import {
 import { useAppContext } from "../Central_Store/app_context.jsx";
 
 const NAME_OPTIONS = ["Auto", "Mini", "Sedan", "SUV", "XL Diesel"];
-const TYPE_OPTIONS = ["Local Ride", "Intercity", "Reservation"];
+const TYPE_OPTIONS = ["Local Ride", "Intercity", "Reservation", "Rental"];
 const BASE_URL = "https://adminapi.onlymeterindia.com";
 
 /* ----------------------------- HEADER ----------------------------- */
@@ -984,6 +984,7 @@ function Modal({
   const [startingFare, setStartingFare] = useState("");
   const [extraChargeDay, setExtraChargeDay] = useState("");
   const [tip, setTip] = useState("");
+  const [perHourCharge, setPerHourCharge] = useState("");
   const [extraChargeMidnight, setExtraChargeMidnight] = useState("");
   const [extraChargeMidnightIntercity, setExtraChargeMidnightIntercity] =
     useState("");
@@ -997,6 +998,7 @@ function Modal({
       setStartingFare(initial.starting_fare ?? "");
       setExtraChargeDay(initial.extra_charge_day ?? "");
       setTip(initial.tip ?? "");
+      setPerHourCharge(initial.per_hour_charge ?? "");
       setExtraChargeMidnight(initial.extra_charge_midnight ?? "");
       setExtraChargeMidnightIntercity(
         initial.extra_charge_midnight_intercity ?? "",
@@ -1009,6 +1011,7 @@ function Modal({
       setStartingFare("");
       setExtraChargeDay("");
       setTip("");
+      setPerHourCharge("");
       setExtraChargeMidnight("");
       setExtraChargeMidnightIntercity("");
     }
@@ -1019,7 +1022,36 @@ function Modal({
   const isAuto = name === "Auto";
   const showExtraCharges = type === "Intercity" || type === "Reservation";
 
+  // function handleSave() {
+  //   if (!farePerKm) return;
+  //   onSave({
+  //     image,
+  //     name,
+  //     fare_per_km: farePerKm,
+  //     type,
+  //     ...(type === "Rental" && { per_hour_charge: perHourCharge }),
+  //     ...(isAuto && { starting_fare: startingFare }),
+  //     ...(showExtraCharges && {
+  //       ...(type === "Intercity"
+  //         ? { tip }
+  //         : {
+  //             extra_charge_day: extraChargeDay,
+  //             extra_charge_midnight: extraChargeMidnight,
+  //           }),
+  //       // extra_charge_day: extraChargeDay,
+  //       // extra_charge_midnight: extraChargeMidnight,
+  //       extra_charge_midnight_intercity: extraChargeMidnightIntercity,
+  //     }),
+  //   });
+  // }
+
   function handleSave() {
+    if (type === "Rental") {
+      if (!perHourCharge) return;
+      onSave({ image, name, type, per_hour_charge: perHourCharge });
+      return;
+    }
+
     if (!farePerKm) return;
     onSave({
       image,
@@ -1034,13 +1066,10 @@ function Modal({
               extra_charge_day: extraChargeDay,
               extra_charge_midnight: extraChargeMidnight,
             }),
-        // extra_charge_day: extraChargeDay,
-        // extra_charge_midnight: extraChargeMidnight,
         extra_charge_midnight_intercity: extraChargeMidnightIntercity,
       }),
     });
   }
-
   const inputCls = `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition ${
     isView
       ? "bg-gray-50 cursor-not-allowed text-gray-500 border-gray-200"
@@ -1137,7 +1166,8 @@ function Modal({
           </div>
 
           {/* Fare Per KM */}
-          <div>
+
+          {/* <div>
             <label className={labelCls}>Fare Per KM (₹)</label>
             <input
               type="number"
@@ -1147,10 +1177,65 @@ function Modal({
               placeholder="e.g. 13"
               disabled={isView}
             />
-          </div>
+          </div> */}
+          {/* {type === "Rental" && (
+            <div>
+              <label className={labelCls}>Per Hour Charge (₹)</label>
+              <input
+                type="number"
+                value={perHourCharge}
+                onChange={(e) => setPerHourCharge(e.target.value)}
+                className={inputCls}
+                placeholder="e.g. 150"
+                disabled={isView}
+              />
+            </div>
+          )} */}
+
+          {type === "Rental" ? (
+            <div>
+              <label className={labelCls}>Per Hour Charge (₹)</label>
+              <input
+                type="number"
+                value={perHourCharge}
+                onChange={(e) => setPerHourCharge(e.target.value)}
+                className={inputCls}
+                placeholder="e.g. 150"
+                disabled={isView}
+              />
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className={labelCls}>Fare Per KM (₹)</label>
+                <input
+                  type="number"
+                  value={farePerKm}
+                  onChange={(e) => setFarePerKm(e.target.value)}
+                  className={inputCls}
+                  placeholder="e.g. 13"
+                  disabled={isView}
+                />
+              </div>
+
+              {isAuto && (
+                <div>
+                  <label className={labelCls}>Starting Fare (₹)</label>
+                  <input
+                    type="number"
+                    value={startingFare}
+                    onChange={(e) => setStartingFare(e.target.value)}
+                    className={inputCls}
+                    placeholder="e.g. 25"
+                    disabled={isView}
+                  />
+                </div>
+              )}
+            </>
+          )}
 
           {/* Starting Fare — only for Auto */}
-          {isAuto && (
+          {/* {isAuto && (
             <div>
               <label className={labelCls}>Starting Fare (₹)</label>
               <input
@@ -1162,7 +1247,7 @@ function Modal({
                 disabled={isView}
               />
             </div>
-          )}
+          )} */}
 
           {/* Extra Charges — only for Intercity or Reservation */}
           {showExtraCharges && (
@@ -1487,6 +1572,9 @@ export default function VehicleFare() {
                   Fare / KM
                 </th>
                 <th className="px-4 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide text-left">
+                  Fare / Hour
+                </th>
+                <th className="px-4 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide text-left">
                   Starting Fare
                 </th>
                 <th className="px-4 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide text-left">
@@ -1541,21 +1629,26 @@ export default function VehicleFare() {
                       ₹{r.fare_per_km ?? "—"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {r.name === "Auto" ? `₹${r.starting_fare ?? "—"}` : "—"}
+                  <td className="px-4 py-3">
+                    <span className="font-medium text-gray-800">
+                      ₹{r.per_hour_charge ?? "-"}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {r.extra_charge_day ? `₹${r.extra_charge_day}` : "—"}
+                    {r.name === "Auto" ? `₹${r.starting_fare ?? "-"}` : "-"}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {r.extra_charge_day ? `₹${r.extra_charge_day}` : "-"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {r.extra_charge_midnight
                       ? `₹${r.extra_charge_midnight}`
-                      : "—"}
+                      : "-"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {r.extra_charge_midnight_intercity
                       ? `₹${r.extra_charge_midnight_intercity}`
-                      : "—"}
+                      : "-"}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
