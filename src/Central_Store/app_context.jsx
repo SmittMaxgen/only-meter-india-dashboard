@@ -41,7 +41,11 @@ export const AppProvider = ({ children }) => {
       console.log(responseData, "this is the res of the post req");
 
       if (!res.ok) {
-        throw new Error(responseData.message || "Failed to post data");
+        throw new Error(
+          responseData.message ||
+            responseData.errors.non_field_errors?.[0] ||
+            "Failed to post data",
+        );
       }
 
       // ✅ Success alert

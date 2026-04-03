@@ -983,6 +983,7 @@ function Modal({
   const [type, setType] = useState(TYPE_OPTIONS[0]);
   const [startingFare, setStartingFare] = useState("");
   const [extraChargeDay, setExtraChargeDay] = useState("");
+  const [tip, setTip] = useState("");
   const [extraChargeMidnight, setExtraChargeMidnight] = useState("");
   const [extraChargeMidnightIntercity, setExtraChargeMidnightIntercity] =
     useState("");
@@ -995,6 +996,7 @@ function Modal({
       setType(initial.type || TYPE_OPTIONS[0]);
       setStartingFare(initial.starting_fare ?? "");
       setExtraChargeDay(initial.extra_charge_day ?? "");
+      setTip(initial.tip ?? "");
       setExtraChargeMidnight(initial.extra_charge_midnight ?? "");
       setExtraChargeMidnightIntercity(
         initial.extra_charge_midnight_intercity ?? "",
@@ -1006,6 +1008,7 @@ function Modal({
       setType(TYPE_OPTIONS[0]);
       setStartingFare("");
       setExtraChargeDay("");
+      setTip("");
       setExtraChargeMidnight("");
       setExtraChargeMidnightIntercity("");
     }
@@ -1025,8 +1028,14 @@ function Modal({
       type,
       ...(isAuto && { starting_fare: startingFare }),
       ...(showExtraCharges && {
-        extra_charge_day: extraChargeDay,
-        extra_charge_midnight: extraChargeMidnight,
+        ...(type === "Intercity"
+          ? { tip }
+          : {
+              extra_charge_day: extraChargeDay,
+              extra_charge_midnight: extraChargeMidnight,
+            }),
+        // extra_charge_day: extraChargeDay,
+        // extra_charge_midnight: extraChargeMidnight,
         extra_charge_midnight_intercity: extraChargeMidnightIntercity,
       }),
     });
@@ -1161,7 +1170,7 @@ function Modal({
               <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide">
                 Extra Charges
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Day Charge (₹)</label>
                   <input
@@ -1184,7 +1193,46 @@ function Modal({
                     disabled={isView}
                   />
                 </div>
-              </div>
+              </div> */}
+
+              {type === "Intercity" ? (
+                <div>
+                  <label className={labelCls}>Tip (₹)</label>
+                  <input
+                    type="number"
+                    value={tip}
+                    onChange={(e) => setTip(e.target.value)}
+                    className={inputCls}
+                    placeholder="e.g. 20"
+                    disabled={isView}
+                  />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Day Charge (₹)</label>
+                    <input
+                      type="number"
+                      value={extraChargeDay}
+                      onChange={(e) => setExtraChargeDay(e.target.value)}
+                      className={inputCls}
+                      placeholder="e.g. 50"
+                      disabled={isView}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Midnight Charge (₹)</label>
+                    <input
+                      type="number"
+                      value={extraChargeMidnight}
+                      onChange={(e) => setExtraChargeMidnight(e.target.value)}
+                      className={inputCls}
+                      placeholder="e.g. 100"
+                      disabled={isView}
+                    />
+                  </div>
+                </div>
+              )}
               <div>
                 <label className={labelCls}>
                   Midnight Intercity Charge (₹)
