@@ -985,6 +985,8 @@ function Modal({
   const [extraChargeDay, setExtraChargeDay] = useState("");
   const [tip, setTip] = useState("");
   const [perHourCharge, setPerHourCharge] = useState("");
+  const [rentalHour, setRentalHour] = useState("");
+  const [rentalKm, setRentalKm] = useState("");
   const [extraChargeMidnight, setExtraChargeMidnight] = useState("");
   const [extraChargeMidnightIntercity, setExtraChargeMidnightIntercity] =
     useState("");
@@ -999,6 +1001,8 @@ function Modal({
       setExtraChargeDay(initial.extra_charge_day ?? "");
       setTip(initial.tip ?? "");
       setPerHourCharge(initial.per_hour_charge ?? "");
+      setRentalHour(initial.rental_hour ?? "");
+      setRentalKm(initial.rental_km ?? "");
       setExtraChargeMidnight(initial.extra_charge_midnight ?? "");
       setExtraChargeMidnightIntercity(
         initial.extra_charge_midnight_intercity ?? "",
@@ -1011,6 +1015,8 @@ function Modal({
       setStartingFare("");
       setExtraChargeDay("");
       setTip("");
+      setRentalHour("");
+      setRentalKm("");
       setPerHourCharge("");
       setExtraChargeMidnight("");
       setExtraChargeMidnightIntercity("");
@@ -1045,10 +1051,43 @@ function Modal({
   //   });
   // }
 
+  // function handleSave() {
+  //   if (type === "Rental") {
+  //     if (!perHourCharge) return;
+  //     onSave({ image, name, type, per_hour_charge: perHourCharge });
+  //     return;
+  //   }
+
+  //   if (!farePerKm) return;
+  //   onSave({
+  //     image,
+  //     name,
+  //     fare_per_km: farePerKm,
+  //     type,
+  //     ...(isAuto && { starting_fare: startingFare }),
+  //     ...(showExtraCharges && {
+  //       ...(type === "Intercity"
+  //         ? { tip }
+  //         : {
+  //             extra_charge_day: extraChargeDay,
+  //             extra_charge_midnight: extraChargeMidnight,
+  //           }),
+  //       extra_charge_midnight_intercity: extraChargeMidnightIntercity,
+  //     }),
+  //   });
+  // }
+
   function handleSave() {
     if (type === "Rental") {
       if (!perHourCharge) return;
-      onSave({ image, name, type, per_hour_charge: perHourCharge });
+      onSave({
+        image,
+        name,
+        type,
+        per_hour_charge: perHourCharge,
+        rental_hour: rentalHour || null,
+        rental_km: rentalKm || null,
+      });
       return;
     }
 
@@ -1192,7 +1231,7 @@ function Modal({
             </div>
           )} */}
 
-          {type === "Rental" ? (
+          {/* {type === "Rental" ? (
             <div>
               <label className={labelCls}>Per Hour Charge (₹)</label>
               <input
@@ -1203,7 +1242,45 @@ function Modal({
                 placeholder="e.g. 150"
                 disabled={isView}
               />
-            </div>
+            </div> */}
+          {type === "Rental" ? (
+            <>
+              <div>
+                <label className={labelCls}>Per Hour Charge (₹)</label>
+                <input
+                  type="number"
+                  value={perHourCharge}
+                  onChange={(e) => setPerHourCharge(e.target.value)}
+                  className={inputCls}
+                  placeholder="e.g. 150"
+                  disabled={isView}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Rental Hour</label>
+                  <input
+                    type="number"
+                    value={rentalHour}
+                    onChange={(e) => setRentalHour(e.target.value)}
+                    className={inputCls}
+                    placeholder="e.g. 15"
+                    disabled={isView}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Rental KM</label>
+                  <input
+                    type="number"
+                    value={rentalKm}
+                    onChange={(e) => setRentalKm(e.target.value)}
+                    className={inputCls}
+                    placeholder="e.g. 1"
+                    disabled={isView}
+                  />
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <div>
@@ -1626,7 +1703,7 @@ export default function VehicleFare() {
                   </td>
                   <td className="px-4 py-3">
                     <span className="font-medium text-gray-800">
-                      ₹{r.fare_per_km ?? "—"}
+                      ₹{r.fare_per_km ?? "-"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
