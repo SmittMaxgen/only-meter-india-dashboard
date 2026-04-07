@@ -1,5 +1,9 @@
 import { useMemo, useState, useEffect } from "react";
-import { MagnifyingGlassIcon, EyeIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  EyeIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 import { Link } from "react-router-dom";
 
@@ -35,6 +39,7 @@ const getStatusChip = (status) => {
 export default function DriverSubscription() {
   const { fetchedData } = useAppContext();
   const [driverSubscriptionData, setDriverSubscriptionData] = useState([]);
+  console.log("driverSubscriptionData::::::>>>>>", driverSubscriptionData);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false); // ✅ new state
@@ -53,7 +58,7 @@ export default function DriverSubscription() {
       (r) =>
         r.driver_data.name?.toLowerCase().includes(q) ||
         r.plan_data.name?.toLowerCase().includes(q) ||
-        r.razorpay_subscription_id?.toLowerCase().includes(q)
+        r.razorpay_subscription_id?.toLowerCase().includes(q),
     );
   }, [query, driverSubscriptionData]);
 
@@ -78,9 +83,12 @@ export default function DriverSubscription() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           {/* Left: Title + breadcrumb */}
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">Driver Subscription</h1>
+            <h1 className="text-xl font-semibold text-gray-900">
+              Driver Subscription
+            </h1>
             <div className="text-sm text-gray-500">
-              Dashboard <span className="text-orange-500">/ Driver Subscription</span>
+              Dashboard{" "}
+              <span className="text-orange-500">/ Driver Subscription</span>
             </div>
           </div>
 
@@ -129,22 +137,32 @@ export default function DriverSubscription() {
                 {current.map((r) => (
                   <tr key={r.id} className="border-t border-gray-100">
                     <td className="px-4 py-3 font-medium text-gray-900">
-                      {r.razorpay_subscription_id|| "-"}
+                      {r.razorpay_subscription_id || "-"}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{r.driver_data.name || "-"}</td>
-                    <td className="px-4 py-3 text-gray-700">{r.plan_data.name || "-"}</td>
-                    <td className="px-4 py-3 text-gray-700">{r.total_count || "-"}</td>
-                    <td className={`px-4 py-3 text-gray-700`}>{getStatusChip(r.status) || "-"}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {r.driver_data.name || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {r.plan_data.name || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {r.total_count || "-"}
+                    </td>
+                    <td className={`px-4 py-3 text-gray-700`}>
+                      {getStatusChip(r.status) || "-"}
+                    </td>
                     <td className="px-4 py-3">
-                        <Link to={`/dashboard/driver-subscription-detail/${r.razorpay_subscription_id}`}>
-                          <button
-                            className="text-gray-700 text-sm px-1 cursor-pointer"
-                            title="View"
-                          >
-                            <EyeIcon className="h-5 w-5" />
-                          </button>
-                        </Link>
-                        {/* <button
+                      <Link
+                        to={`/dashboard/driver-subscription-detail/${r.razorpay_subscription_id}`}
+                      >
+                        <button
+                          className="text-gray-700 text-sm px-1 cursor-pointer"
+                          title="View"
+                        >
+                          <EyeIcon className="h-5 w-5" />
+                        </button>
+                      </Link>
+                      {/* <button
                           onClick={() => handleDelete(r.razorpay_subscription_id)}
                           className="text-sm px-1 text-red-600 cursor-pointer"
                           title="Delete"
@@ -181,22 +199,24 @@ export default function DriverSubscription() {
               «
             </button>
 
-            {Array.from({ length: pageCount }).slice(0, 5).map((_, i) => {
-              const num = i + 1;
-              return (
-                <button
-                  key={num}
-                  onClick={() => setPage(num)}
-                  className={`px-3 py-1 rounded text-sm border ${
-                    page === num
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-white"
-                  }`}
-                >
-                  {num}
-                </button>
-              );
-            })}
+            {Array.from({ length: pageCount })
+              .slice(0, 5)
+              .map((_, i) => {
+                const num = i + 1;
+                return (
+                  <button
+                    key={num}
+                    onClick={() => setPage(num)}
+                    className={`px-3 py-1 rounded text-sm border ${
+                      page === num
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : "bg-white"
+                    }`}
+                  >
+                    {num}
+                  </button>
+                );
+              })}
 
             <button
               className="px-3 py-1 rounded border text-sm disabled:opacity-50"
