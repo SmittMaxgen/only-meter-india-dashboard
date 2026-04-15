@@ -29,7 +29,7 @@ export default function DriverDetail() {
 
       const location = await getLocationFromCoords(
         driverData?.lat,
-        driverData?.lng
+        driverData?.lng,
       );
 
       setDriver({ ...driverData, location });
@@ -190,11 +190,17 @@ export default function DriverDetail() {
         </InfoCard>
 
         <InfoCard title="Vehicle Details">
-          <Detail label="Brand" value={driver?.vehicle_data?.vehicle_type_data.brand_data?.name} />
-          <Detail label="Model" value={driver?.vehicle_data?.vehicle_type_data?.model_data?.name} />
-          <Detail label="Type" value={driver?.vehicle_data?.vehicle_type_data?.type_data?.name} />
-          <Detail label="Seats" value={driver?.vehicle_data?.vehicle_type_data.seats} />
-          <Detail label="Mode" value={driver?.vehicle_data?.vehicle_type_data.vehicleMode} />
+          <Detail
+            label="Brand"
+            value={driver?.vehicle_data?.brand_data?.name}
+          />
+          <Detail
+            label="Model"
+            value={driver?.vehicle_data?.model_data?.name}
+          />
+          <Detail label="Type" value={driver?.vehicle_data?.type_data?.name} />
+          <Detail label="Seats" value={driver?.vehicle_data?.seats} />
+          <Detail label="Mode" value={driver?.vehicle_data?.vehicleMode} />
         </InfoCard>
       </div>
 
@@ -229,15 +235,24 @@ export default function DriverDetail() {
             Membership Details
           </h2>
           <div className="space-y-2 text-sm text-gray-700">
-            <Detail label="Membership Type" value={driver.membership_type} />
-            <Detail label="Plan Purchased ID" value={driver.plan_purchased_id} />
-            <Detail label="Subscription ID" value={driver.subscription_id} />
+            <Detail
+              label="Membership Type"
+              value={driver.membership_type || "N/A"}
+            />
+            <Detail
+              label="Plan Purchased ID"
+              value={driver.plan_purchased_id || "N/A"}
+            />
+            <Detail
+              label="Subscription ID"
+              value={driver.subscription_id || "N/A"}
+            />
             <Detail
               label="Plan Purchased On"
               value={
                 driver.plan_purchased_date_time
                   ? formatDate(driver.plan_purchased_date_time)
-                  : "-"
+                  : "N/A"
               }
             />
             <Detail
@@ -245,7 +260,7 @@ export default function DriverDetail() {
               value={
                 driver.plan_expire_date_time
                   ? formatDate(driver.plan_expire_date_time)
-                  : "-"
+                  : "N/A"
               }
             />
           </div>
