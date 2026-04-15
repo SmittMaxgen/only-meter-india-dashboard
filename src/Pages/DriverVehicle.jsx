@@ -351,10 +351,10 @@ export default function DriverVehicles() {
                   current?.map((r) => (
                     <tr key={r.id} className="border-t border-gray-100">
                       <td className="px-4 py-3 font-medium text-gray-900">
-                        {r?.driver_data?.name || "-"}
+                        {r?.model_data?.name || "-"}
                       </td>
                       <td className="px-4 py-3 text-gray-700">
-                        {r?.vehicle_type_data?.model_data?.name || "-"}
+                        {r?.model_data?.brand_data?.name || "-"}
                       </td>
                       <td className="px-4 py-3 text-gray-700">
                         {r?.rc_number || "-"}
