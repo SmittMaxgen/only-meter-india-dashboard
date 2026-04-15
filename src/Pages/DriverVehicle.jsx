@@ -346,44 +346,46 @@ export default function DriverVehicles() {
               </thead>
 
               <tbody>
-                {current.map((r) => (
-                  <tr key={r.id} className="border-t border-gray-100">
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {r.driver_data.name || "-"}
-                    </td>
-                    <td className="px-4 py-3 text-gray-700">
-                      {r.vehicle_type_data.model_data?.name || "-"}
-                    </td>
-                    <td className="px-4 py-3 text-gray-700">
-                      {r.rc_number || "-"}
-                    </td>
-                    <td className="px-4 py-3 text-gray-700">
-                      {r.insurance_number || "-"}
-                    </td>
-                    <td
-                      className={`px-4 py-3 font-medium ${r.verified === true ? "text-green-600" : "text-red-600"}`}
-                    >
-                      {r.verified === true ? "Yes" : "No"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link to={`/dashboard/driver-vehicle-detail/${r.id}`}>
-                        <button
-                          className="text-sm px-1 text-gray-700 cursor-pointer"
-                          title="View"
-                        >
-                          <EyeIcon className="h-5 w-5" />
-                        </button>
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(r.id)}
-                        className="text-sm px-1 text-red-600 cursor-pointer"
-                        title="Delete"
+                {current &&
+                  current?.length > 0 &&
+                  current?.map((r) => (
+                    <tr key={r.id} className="border-t border-gray-100">
+                      <td className="px-4 py-3 font-medium text-gray-900">
+                        {r?.driver_data?.name || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">
+                        {r?.vehicle_type_data?.model_data?.name || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">
+                        {r?.rc_number || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">
+                        {r?.insurance_number || "-"}
+                      </td>
+                      <td
+                        className={`px-4 py-3 font-medium ${r.verified === true ? "text-green-600" : "text-red-600"}`}
                       >
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        {r?.verified === true ? "Yes" : "No"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Link to={`/dashboard/driver-vehicle-detail/${r.id}`}>
+                          <button
+                            className="text-sm px-1 text-gray-700 cursor-pointer"
+                            title="View"
+                          >
+                            <EyeIcon className="h-5 w-5" />
+                          </button>
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(r.id)}
+                          className="text-sm px-1 text-red-600 cursor-pointer"
+                          title="Delete"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
 
                 {!loading && current.length === 0 && (
                   <tr>
