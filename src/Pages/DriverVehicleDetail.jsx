@@ -266,27 +266,27 @@ export default function DriverDetail() {
             <div className="flex">
               <span className="font-medium w-40">Brand</span>
               <span className="mr-2">:</span>
-              <span>{driverVehicleData.vehicle_type_data.brand_data?.name}</span>
+              <span>{driverVehicleData.brand_data?.name}</span>
             </div>
             <div className="flex">
               <span className="font-medium w-40">Model</span>
               <span className="mr-2">:</span>
-              <span>{driverVehicleData.vehicle_type_data.model_data?.name}</span>
+              <span>{driverVehicleData?.model_data?.name}</span>
             </div>
             <div className="flex">
               <span className="font-medium w-40">Type</span>
               <span className="mr-2">:</span>
-              <span>{driverVehicleData.vehicle_type_data.type_data?.name}</span>
+              <span>{driverVehicleData?.type_data?.name}</span>
             </div>
             <div className="flex">
               <span className="font-medium w-40">Seats</span>
               <span className="mr-2">:</span>
-              <span>{driverVehicleData.vehicle_type_data.seats}</span>
+              <span>{driverVehicleData?.seats}</span>
             </div>
             <div className="flex">
               <span className="font-medium w-40">Fuel Type</span>
               <span className="mr-2">:</span>
-              <span>{driverVehicleData.vehicle_type_data.fuelType}</span>
+              <span>{driverVehicleData?.fuelType}</span>
             </div>
           </div>
         </div>
