@@ -25,7 +25,6 @@ export const AppProvider = ({ children }) => {
 
   const getData = async (endPoint) => {
     const res = await fetch(`${baseUrl}${endPoint}`);
-    console.log("res:::>>>>", res);
     const data = await res.json();
     return data.data;
   };
