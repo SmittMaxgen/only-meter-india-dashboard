@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import {PencilIcon,TrashIcon,PlusIcon,XMarkIcon} from "@heroicons/react/24/outline";
+import {
+  PencilIcon,
+  TrashIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 import Swal from "sweetalert2";
 
@@ -9,9 +14,7 @@ function Header({ onAdd }) {
     <div className="bg-white rounded-xl border border-gray-200 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">
-            Vehicle Model
-          </h1>
+          <h1 className="text-xl font-semibold text-gray-900">Vehicle Model</h1>
           <div className="text-sm text-gray-500">
             Dashboard <span className="text-orange-500">/ Vehicle Model</span>
           </div>
@@ -34,6 +37,7 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
   const [form, setForm] = useState({
     name: "",
     brand_data: "",
+    year: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -41,15 +45,20 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
   useEffect(() => {
     setForm({
       name: initial?.name || "",
-      brand_data:
-        initial?.brand_data?.id || initial?.brand_data || "",
+      brand_data: initial?.brand_data?.id || initial?.brand_data || "",
+      year: initial?.year || "",
     });
   }, [initial]);
 
+  // if (!open) return null;
   if (!open) return null;
 
+  const currentYear = new Date().getFullYear();
+
+  const years = Array.from({ length: 11 }, (_, i) => currentYear - 10 + i);
+
   async function handleSave() {
-    if (!form.name.trim() || !form.brand_data) {
+    if (!form.name.trim() || !form.brand_data || !form.year) {
       Swal.fire({
         icon: "warning",
         title: "Missing Fields",
@@ -65,7 +74,7 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose}/>
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative max-w-2xl mx-auto mt-16 bg-white rounded-xl shadow-xl">
         <div className="flex items-center justify-between p-4">
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -75,12 +84,10 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
         </div>
 
         <div className="p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Brand Dropdown */}
             <div>
-              <label className="block text-sm font-semibold mb-1">
-                Brand
-              </label>
+              <label className="block text-sm font-semibold mb-1">Brand</label>
               <select
                 value={form.brand_data}
                 onChange={(e) =>
@@ -99,6 +106,29 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
                 ))}
               </select>
             </div>
+            {/* Year Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold mb-1">Year</label>
+
+              <select
+                value={form.year}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    year: e.target.value,
+                  })
+                }
+                className="w-full border rounded-lg px-3 py-2"
+              >
+                <option value="">Select Year</option>
+
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
             {/* Model Name */}
             <div>
               <label className="block text-sm font-semibold mb-1">
@@ -106,9 +136,7 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
               </label>
               <input
                 value={form.name}
-                onChange={(e) =>
-                  setForm({ ...form, name: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Enter Vehicle Model"
                 className="w-full border rounded-lg px-3 py-2"
               />
@@ -116,16 +144,17 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
           </div>
         </div>
         <div className="flex justify-end gap-3 p-4">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-md">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-100 rounded-md"
+          >
             Close
           </button>
           <button
             onClick={handleSave}
             disabled={loading}
             className={`px-4 py-2 rounded-md text-white ${
-              loading
-                ? "bg-orange-300"
-                : "bg-orange-500 hover:bg-orange-600"
+              loading ? "bg-orange-300" : "bg-orange-500 hover:bg-orange-600"
             }`}
           >
             {loading ? "Saving..." : "Save"}
@@ -138,8 +167,7 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
 
 /* ----------------------------- MAIN COMPONENT ----------------------------- */
 export default function VehicleModel() {
-  const { fetchedData, postData, patchData, deleteData } =
-    useAppContext();
+  const { fetchedData, postData, patchData, deleteData } = useAppContext();
 
   const [models, setModels] = useState([]);
   const [open, setOpen] = useState(false);
@@ -164,20 +192,21 @@ export default function VehicleModel() {
   const handleSave = async (formData) => {
     try {
       const payload = new FormData();
-      Object.entries(formData).forEach(([k, v]) =>
-        payload.append(k, v)
-      );
+      Object.entries(formData).forEach(([k, v]) => payload.append(k, v));
 
       if (editing) {
-        await patchData(`/model/${editing.id}/`,payload,"Vehicle Model");
+        await patchData(`/model/${editing.id}/`, payload, "Vehicle Model");
 
-        const selectedBrand = fetchedData.brands.find((b) => b.id === Number(formData.brand_data));
+        const selectedBrand = fetchedData.brands.find(
+          (b) => b.id === Number(formData.brand_data),
+        );
 
         setModels((prev) =>
           prev.map((v) =>
             v.id === editing.id
-              ? { ...v, name: formData.name, brand_data: selectedBrand,} : v
-          )
+              ? { ...v, name: formData.name, brand_data: selectedBrand }
+              : v,
+          ),
         );
       } else {
         const res = await postData("/model/", payload, "Vehicle Model");
@@ -195,9 +224,7 @@ export default function VehicleModel() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/model/${id}/`);
-      setModels((prev) =>
-        prev.filter((v) => v.id !== id)
-      );
+      setModels((prev) => prev.filter((v) => v.id !== id));
     } catch (error) {
       console.error("Delete Error:", error);
     }
@@ -256,7 +283,7 @@ export default function VehicleModel() {
       </div>
 
       <Modal
-        title={ editing ? "Edit Vehicle Model" : "Add Vehicle Model" }
+        title={editing ? "Edit Vehicle Model" : "Add Vehicle Model"}
         open={open}
         onClose={() => setOpen(false)}
         onSave={handleSave}
