@@ -46,7 +46,7 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
     setForm({
       name: initial?.name || "",
       brand_data: initial?.brand_data?.id || initial?.brand_data || "",
-      year: initial?.year || "",
+      // year: initial?.year || "",
     });
   }, [initial]);
 
@@ -58,7 +58,7 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
   const years = Array.from({ length: 11 }, (_, i) => currentYear - 10 + i);
 
   async function handleSave() {
-    if (!form.name.trim() || !form.brand_data || !form.year) {
+    if (!form.name.trim() || !form.brand_data) {
       Swal.fire({
         icon: "warning",
         title: "Missing Fields",
@@ -107,7 +107,7 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
               </select>
             </div>
             {/* Year Dropdown */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-semibold mb-1">Year</label>
 
               <select
@@ -128,7 +128,7 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
             {/* Model Name */}
             <div>
               <label className="block text-sm font-semibold mb-1">

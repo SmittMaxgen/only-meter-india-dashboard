@@ -340,6 +340,7 @@ export default function DriverVehicles() {
                   <th className="px-4 py-3 font-medium">Model</th>
                   <th className="px-4 py-3 font-medium">RC Number</th>
                   <th className="px-4 py-3 font-medium">Insurance Number</th>
+                  <th className="px-4 py-3 font-medium">Vehicle Year</th>
                   <th className="px-4 py-3 font-medium">Verified</th>
                   <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
@@ -362,6 +363,11 @@ export default function DriverVehicles() {
                       <td className="px-4 py-3 text-gray-700">
                         {r?.insurance_number || "-"}
                       </td>
+
+                      <td className="px-4 py-3 text-gray-700">
+                        {r?.vehicle_year || "-"}
+                      </td>
+
                       <td
                         className={`px-4 py-3 font-medium ${r.verified === true ? "text-green-600" : "text-red-600"}`}
                       >
