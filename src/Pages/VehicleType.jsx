@@ -1,5 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
-import { PencilIcon,TrashIcon,PlusIcon,XMarkIcon} from "@heroicons/react/24/outline";
+import {
+  PencilIcon,
+  TrashIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 import Swal from "sweetalert2";
 
@@ -61,27 +66,31 @@ function Modal({ title, open, onClose, onSave, initial }) {
       <div className="relative max-w-2xl mx-auto mt-16 bg-white rounded-xl shadow-xl">
         <div className="flex items-center justify-between p-4">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <button className="p-2 hover:bg-gray-100 rounded-md" onClick={onClose}>
+          <button
+            className="p-2 hover:bg-gray-100 rounded-md"
+            onClick={onClose}
+          >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
         <div className="p-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-            {[
-              ["Type", "name", "Enter Vehicle Type"],
-            ].map(([label, key, placeholder]) => (
-              <div key={key}>
-                <label className="block text-sm font-semibold mb-1">
-                  {label}
-                </label>
-                <input
-                  value={form[key]}
-                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                  placeholder={placeholder}
-                  className="w-full border rounded-lg px-3 py-2"
-                />
-              </div>
-            ))}
+            {[["Type", "name", "Enter Vehicle Type"]].map(
+              ([label, key, placeholder]) => (
+                <div key={key}>
+                  <label className="block text-sm font-semibold mb-1">
+                    {label}
+                  </label>
+                  <input
+                    value={form[key]}
+                    onChange={(e) =>
+                      setForm({ ...form, [key]: e.target.value })
+                    }
+                    placeholder={placeholder}
+                    className="w-full border rounded-lg px-3 py-2"
+                  />
+                </div>
+              ))}
           </div>
         </div>
         <div className="flex items-center justify-end gap-3 p-4">

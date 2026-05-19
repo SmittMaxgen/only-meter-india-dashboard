@@ -862,7 +862,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 
-const NAME_OPTIONS = ["Auto", "Mini", "Sedan", "SUV", "XL Diesel"];
+// const NAME_OPTIONS = ["Auto", "Mini", "Sedan", "SUV", "XL Diesel"];
 const TYPE_OPTIONS = ["Local Ride", "Intercity", "Reservation", "Rental"];
 const BASE_URL = "https://adminapi.onlymeterindia.com";
 
@@ -976,9 +976,10 @@ function Modal({
   onSave,
   initial,
   isView = false,
+  nameOptions = [], // ← Added
 }) {
   const [image, setImage] = useState(null);
-  const [name, setName] = useState(NAME_OPTIONS[0]);
+  const [name, setName] = useState(nameOptions[0]);
   const [farePerKm, setFarePerKm] = useState("");
   const [type, setType] = useState(TYPE_OPTIONS[0]);
   const [startingFare, setStartingFare] = useState("");
@@ -994,7 +995,7 @@ function Modal({
   useEffect(() => {
     if (initial) {
       setImage(initial.image || "");
-      setName(initial.name || NAME_OPTIONS[0]);
+      setName(initial.name || nameOptions[0] || ""); // ← Fixed
       setFarePerKm(initial.fare_per_km ?? "");
       setType(initial.type || TYPE_OPTIONS[0]);
       setStartingFare(initial.starting_fare ?? "");
@@ -1009,7 +1010,7 @@ function Modal({
       );
     } else {
       setImage(null);
-      setName(NAME_OPTIONS[0]);
+      setName(nameOptions[0] || ""); // ← Safe fallback
       setFarePerKm("");
       setType(TYPE_OPTIONS[0]);
       setStartingFare("");
@@ -1021,8 +1022,7 @@ function Modal({
       setExtraChargeMidnight("");
       setExtraChargeMidnightIntercity("");
     }
-  }, [initial, open]);
-
+  }, [initial, open, nameOptions]); // ← Added nameOptions in dependency
   if (!open) return null;
 
   const isAuto = name === "Auto";
@@ -1180,7 +1180,7 @@ function Modal({
                 className={isView || !!initial ? disabledSelectCls : inputCls}
                 disabled={isView || !!initial}
               >
-                {NAME_OPTIONS.map((n) => (
+                {nameOptions.map((n) => (
                   <option key={n} value={n}>
                     {n}
                   </option>
@@ -1438,7 +1438,11 @@ function Modal({
 
 /* ----------------------------- MAIN COMPONENT ----------------------------- */
 export default function VehicleFare() {
-  const { postData, patchData, deleteData } = useAppContext();
+  const { postData, patchData, deleteData, fetchedData } = useAppContext();
+
+  // Extract only name strings from types objects
+  const NAME_OPTIONS =
+    fetchedData.types?.map((item) => item?.name).filter(Boolean) || [];
   const [fares, setFares] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -1854,6 +1858,7 @@ export default function VehicleFare() {
         onSave={handleSave}
         initial={viewing || editing}
         isView={!!viewing}
+        nameOptions={NAME_OPTIONS} // ← Added
       />
     </div>
   );
