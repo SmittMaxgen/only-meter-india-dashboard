@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 import { useNavigate } from "react-router-dom";
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import img from "../assets/login_page.png"
-import Logo from "../assets/Logo.png"
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import img from "../assets/login_page.png";
+import Logo from "../assets/Logo_1.jpg";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -52,7 +52,6 @@ function LoginPage() {
 
       const validData = data.data;
 
-
       if (!response.ok) {
         throw new Error(data.message || "Login failed");
       }
@@ -65,9 +64,9 @@ function LoginPage() {
         setEmail("");
         setPassword("");
       } else {
-        if(validData.email === email){
+        if (validData.email === email) {
           setError("Not a valid email");
-        }else {
+        } else {
           setError("Not a valid password");
         }
       }
@@ -99,16 +98,16 @@ function LoginPage() {
           className="w-full h-full object-cover"
         />
       </div>
-      
+
       {/* Right Section - Login Form */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 bg-white">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <div className="flex justify-center">
+          <div className="flex justify-center rounded-full position-relative">
             <img src={Logo} alt="My Taxi Logo" className="h-52 w-auto" />
           </div>
           <h2 className="text-3xl font-bold text-gray-800 mb-8">Unlock Your Admin Dashboard</h2>
-          
+
           {error && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
               {error}
@@ -118,7 +117,10 @@ function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email
               </label>
               <input
@@ -164,7 +166,7 @@ function LoginPage() {
                 </button>
               </div>
             </div>
-            
+
             {/* Login Button */}
             <div>
               <button
