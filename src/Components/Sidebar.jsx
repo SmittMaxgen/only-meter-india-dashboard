@@ -508,6 +508,16 @@ export default function Sidebar({ isOpen, onClose }) {
           },
         ],
       },
+      {
+        title: "Sales Agent Management",
+        items: [
+          {
+            label: "Sales Agents",
+            to: "/dashboard/sales-agents",
+            icon: TicketIcon,
+          },
+        ],
+      },
     ],
     [],
   );

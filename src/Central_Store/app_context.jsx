@@ -21,6 +21,7 @@ export const AppProvider = ({ children }) => {
     brands: null,
     models: null,
     types: null,
+    salesAgents: null,
   });
 
   const getData = async (endPoint) => {
@@ -176,6 +177,7 @@ export const AppProvider = ({ children }) => {
         getData("/brand/"),
         getData("/model/"),
         getData("/type/"),
+        getData("/sales_agent/"),
       ]);
 
       const [
@@ -193,6 +195,7 @@ export const AppProvider = ({ children }) => {
         brandData,
         modelData,
         typeData,
+        salesAgentData,
       ] = results.map((r) => (r.status === "fulfilled" ? r.value : []));
 
       setFetchedData({
@@ -210,6 +213,7 @@ export const AppProvider = ({ children }) => {
         brands: brandData,
         models: modelData,
         types: typeData,
+        salesAgents: salesAgentData,
       });
     } catch (error) {
       console.error("Unexpected error:", error);

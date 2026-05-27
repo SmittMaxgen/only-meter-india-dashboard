@@ -32,6 +32,7 @@ import Customers from "../Pages/Customers.jsx";
 import CustomerDetail from "../Pages/CustomerDetail.jsx";
 import Banner from "../Pages/Banner.jsx";
 import Offer from "../Pages/Offer.jsx";
+import SalesAgents from "../Pages/SalesAgents.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -82,6 +83,7 @@ export const router = createBrowserRouter([
           { path: "support-ticket", element: <SupportTicket /> },
           { path: "work", element: <WorkInProgress /> },
           { path: "vehicle-fare", element: <VehicleFare /> },
+          { path: "sales-agents", element: <SalesAgents /> },
           { path: "*", element: <WorkInProgress /> },
         ],
       },
