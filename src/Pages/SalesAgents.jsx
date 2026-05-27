@@ -13,10 +13,12 @@ import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
 
 export default function SalesAgents() {
-  const { fetchedData, deleteData, postData, patchData } = useAppContext();
+  const { fetchedData, deleteData, postData, patchData, baseUrl } =
+    useAppContext();
 
   const [agents, setAgents] = useState([]);
-  const [query, setQuery] = useState("");
+  const [nameQuery, setNameQuery] = useState("");
+  const [mobileQuery, setMobileQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
@@ -28,24 +30,45 @@ export default function SalesAgents() {
     mobile: "",
   });
 
-  // Load Data
+  // Fetch with search parameters
+  const fetchAgents = async (name = "", mobile = "") => {
+    try {
+      let endpoint = "/sales_agent/";
+      const params = new URLSearchParams();
+
+      if (name.trim()) params.append("name", name.trim());
+      if (mobile.trim()) params.append("mobile", mobile.trim());
+
+      if (params.toString()) {
+        endpoint += "?" + params.toString();
+      }
+
+      const res = await fetch(`${baseUrl}${endpoint}`);
+      const data = await res.json();
+      setAgents(data.data || []);
+      setPage(1); // Reset to first page on new search
+    } catch (error) {
+      console.error("Search Error:", error);
+      Swal.fire("Error", "Failed to fetch agents", "error");
+    }
+  };
+
+  // Load initial data
   useEffect(() => {
-    setAgents(fetchedData.salesAgents || []);
-  }, [fetchedData.salesAgents]);
+    fetchAgents();
+  }, []);
 
-  // Dynamic Search
-  const filtered = useMemo(() => {
-    if (!query.trim()) return agents;
-    const q = query.toLowerCase().trim();
-    return agents.filter(
-      (agent) =>
-        agent.name?.toLowerCase().includes(q) ||
-        agent.mobile?.toLowerCase().includes(q),
-    );
-  }, [query, agents]);
+  // Search when name or mobile changes
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchAgents(nameQuery, mobileQuery);
+    }, 500); // Debounce 500ms
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const current = filtered.slice((page - 1) * pageSize, page * pageSize);
+    return () => clearTimeout(timeout);
+  }, [nameQuery, mobileQuery]);
+
+  const pageCount = Math.max(1, Math.ceil(agents.length / pageSize));
+  const current = agents.slice((page - 1) * pageSize, page * pageSize);
 
   const resetForm = () => {
     setFormData({ name: "", mobile: "" });
@@ -71,21 +94,17 @@ export default function SalesAgents() {
     resetForm();
   };
 
-  // ✅ Smart Submit - Send only changed fields in PATCH
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.name || !formData.mobile) {
       Swal.fire("Error", "Name and Mobile Number are required!", "error");
       return;
     }
 
     const payload = new FormData();
+    let hasChanges = false;
 
     if (editingAgent) {
-      // PATCH - Only send changed fields
-      let hasChanges = false;
-
       if (formData.name !== editingAgent.name) {
         payload.append("name", formData.name);
         hasChanges = true;
@@ -96,39 +115,20 @@ export default function SalesAgents() {
       }
 
       if (!hasChanges) {
-        Swal.fire("No Changes", "Nothing was changed.", "info");
         closeModal();
         return;
       }
 
-      try {
-        await patchData(
-          `/sales_agent/${editingAgent.agent_id}/`,
-          payload,
-          "Sales Agent",
-        );
-
-        // Update local state
-        setAgents((prev) =>
-          prev.map((a) =>
-            a.agent_id === editingAgent.agent_id ? { ...a, ...formData } : a,
-          ),
-        );
-      } catch (err) {
-        console.error(err);
-        return;
-      }
+      await patchData(
+        `/sales_agent/${editingAgent.agent_id}/`,
+        payload,
+        "Sales Agent",
+      );
     } else {
-      // CREATE - Send all fields
       payload.append("name", formData.name);
       payload.append("mobile", formData.mobile);
-      try {
-        await postData("/sales_agent/", payload, "Sales Agent");
-        window.location.reload();
-      } catch (err) {
-        console.error(err);
-        return;
-      }
+      await postData("/sales_agent/", payload, "Sales Agent");
+      fetchAgents(nameQuery, mobileQuery); // Refresh list
     }
 
     closeModal();
@@ -137,16 +137,16 @@ export default function SalesAgents() {
   const handleDelete = async (agent_id) => {
     try {
       await deleteData(`/sales_agent/${agent_id}/`);
-      setAgents((prev) => prev.filter((a) => a.agent_id !== agent_id));
+      fetchAgents(nameQuery, mobileQuery); // Refresh after delete
     } catch (err) {
-      console.error("Delete failed:", err);
+      console.error(err);
     }
   };
 
   const exportToExcel = () => {
-    if (filtered.length === 0) return;
+    if (agents.length === 0) return;
 
-    const rows = filtered.map((agent) => ({
+    const rows = agents.map((agent) => ({
       "Agent ID": agent.agent_id || "-",
       Name: agent.name || "-",
       Mobile: agent.mobile || "-",
@@ -186,15 +186,25 @@ export default function SalesAgents() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative w-80">
+            {/* Name Search */}
+            <div className="relative w-64">
               <input
                 type="text"
-                placeholder="Search by name or mobile..."
-                value={query}
-                onChange={(e) => {
-                  setPage(1);
-                  setQuery(e.target.value);
-                }}
+                placeholder="Search by Name..."
+                value={nameQuery}
+                onChange={(e) => setNameQuery(e.target.value)}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
+
+            {/* Mobile Search */}
+            <div className="relative w-64">
+              <input
+                type="text"
+                placeholder="Search by Mobile..."
+                value={mobileQuery}
+                onChange={(e) => setMobileQuery(e.target.value)}
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -210,7 +220,7 @@ export default function SalesAgents() {
 
             <button
               onClick={exportToExcel}
-              disabled={filtered.length === 0}
+              disabled={agents.length === 0}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg font-medium"
             >
               <ArrowDownTrayIcon className="h-5 w-5" />
@@ -354,13 +364,13 @@ export default function SalesAgents() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-100 font-medium"
+                  className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium"
+                  className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl"
                 >
                   {editingAgent ? "Update Agent" : "Add Agent"}
                 </button>
