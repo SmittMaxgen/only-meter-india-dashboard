@@ -98,7 +98,10 @@ function Modal({ open, onClose, onSave, initial }) {
           <h2 className="text-lg font-semibold">
             {initial ? "Edit Rental Package" : "Add Rental Package"}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-md">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-md"
+          >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
@@ -159,7 +162,10 @@ function Modal({ open, onClose, onSave, initial }) {
         </div>
 
         <div className="flex justify-end gap-3 p-4">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-md">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-100 rounded-md"
+          >
             Cancel
           </button>
           <button
@@ -176,12 +182,17 @@ function Modal({ open, onClose, onSave, initial }) {
 
 // ---------------------- Main Component ----------------------
 export default function RentalPackage() {
-  const {fetchedData, postData, patchData, deleteData } = useAppContext();
+  const { fetchedData, postData, patchData, deleteData, refetchResource } =
+    useAppContext();
   const [packages, setPackages] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
+  useEffect(() => {
+    refetchResource("rentalPackages", "/rental_package/");
+  }, []);
 
   // Fetch all packages
   useEffect(() => {
@@ -208,19 +219,16 @@ export default function RentalPackage() {
       Object.entries(formData).forEach(([k, v]) => payload.append(k, v));
 
       if (editing) {
-        const res = await patchData(`/rental_package/${editing.id}/`, payload, "Rental Package");
-        // Update local state immediately
-        setPackages((prev) =>
-          prev.map((v) => (v.id === editing.id ? { ...v, ...formData } : v))
+        await patchData(
+          `/rental_package/${editing.id}/`,
+          payload,
+          "Rental Package",
         );
       } else {
-        const res = await postData("/rental_package/", payload, "Rental Package");
-        // Add new item locally (if response has data)
-        if (res && res.data) {
-          setPackages((prev) => [...prev, res.data]);
-        }
+        await postData("/rental_package/", payload, "Rental Package");
       }
 
+      await refetchResource("rentalPackages", "/rental_package/");
       setOpen(false);
       setEditing(null);
     } catch (error) {
@@ -231,7 +239,7 @@ export default function RentalPackage() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/rental_package/${id}/`);
-      setPackages((prev) => prev.filter((v) => v.id !== id));
+      await refetchResource("rentalPackages", "/rental_package/");
     } catch (error) {
       console.error("Delete Error:", error);
     }
@@ -265,9 +273,12 @@ export default function RentalPackage() {
                   <td className="px-4 py-3">{pkg.duration_hours}</td>
                   <td className="px-4 py-3">{pkg.km_included}</td>
                   <td className="px-4 py-3">{pkg.base_fare}</td>
-                  <td className={`px-4 py-3 font-medium ${
-                    pkg.is_active ? "text-green-600" : "text-red-600"}
-                    `}>
+                  <td
+                    className={`px-4 py-3 font-medium ${
+                      pkg.is_active ? "text-green-600" : "text-red-600"
+                    }
+                    `}
+                  >
                     {pkg.is_active ? "Yes" : "No"}
                   </td>
                   <td className="px-4 py-3">
@@ -302,42 +313,44 @@ export default function RentalPackage() {
             </tbody>
           </table>
           {/* Pagination */}
-        {current.length > 0 && (
-          <div className="flex items-center justify-center gap-2 p-4">
-            <button
-              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              «
-            </button>
+          {current.length > 0 && (
+            <div className="flex items-center justify-center gap-2 p-4">
+              <button
+                className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                «
+              </button>
 
-            {Array.from({ length: pageCount }).slice(0, 5).map((_, i) => {
-              const num = i + 1;
-              return (
-                <button
-                  key={num}
-                  onClick={() => setPage(num)}
-                  className={`px-3 py-1 rounded text-sm border ${
-                    page === num
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-white"
-                  }`}
-                >
-                  {num}
-                </button>
-              );
-            })}
+              {Array.from({ length: pageCount })
+                .slice(0, 5)
+                .map((_, i) => {
+                  const num = i + 1;
+                  return (
+                    <button
+                      key={num}
+                      onClick={() => setPage(num)}
+                      className={`px-3 py-1 rounded text-sm border ${
+                        page === num
+                          ? "bg-orange-500 text-white border-orange-500"
+                          : "bg-white"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
 
-            <button
-              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
-              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              disabled={page === pageCount}
-            >
-              »
-            </button>
-          </div>
-        )}
+              <button
+                className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+                onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                disabled={page === pageCount}
+              >
+                »
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -17,7 +17,8 @@ function Header({ onAdd }) {
             Subscription Plan
           </h1>
           <div className="text-sm text-gray-500">
-            Dashboard <span className="text-orange-500">/ Subscription Plan</span>
+            Dashboard{" "}
+            <span className="text-orange-500">/ Subscription Plan</span>
           </div>
         </div>
         <button
@@ -75,7 +76,10 @@ function Modal({ open, onClose, onSave, initial }) {
           <h2 className="text-lg font-semibold">
             {initial ? "Edit Subscription Plan" : "Add Subscription Plan"}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-md">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-md"
+          >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
@@ -116,7 +120,8 @@ function Modal({ open, onClose, onSave, initial }) {
             </div>
             <div>
               <label className="block font-bold text-sm mb-1">
-                Interval <span className="text-gray-500 font-normal">(optional)</span>
+                Interval{" "}
+                <span className="text-gray-500 font-normal">(optional)</span>
               </label>
               <input
                 type="number"
@@ -131,7 +136,10 @@ function Modal({ open, onClose, onSave, initial }) {
         </div>
 
         <div className="flex justify-end gap-3 p-4">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-md">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-100 rounded-md"
+          >
             Cancel
           </button>
           <button
@@ -148,10 +156,13 @@ function Modal({ open, onClose, onSave, initial }) {
 
 // ---------------------- Main Component ----------------------
 export default function SubscriptionPlan() {
-  const { fetchedData,postData, patchData } = useAppContext();
+  const { fetchedData, postData, patchData, refetchResource } = useAppContext();
   const [plans, setPlans] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  useEffect(() => {
+    refetchResource("subscriptions", "/plans/");
+  }, []);
 
   useEffect(() => {
     setPlans(fetchedData.subscriptions || []);
@@ -173,19 +184,12 @@ export default function SubscriptionPlan() {
       Object.entries(formData).forEach(([k, v]) => payload.append(k, v));
 
       if (editing) {
-        const res = await patchData(`/plans/create/${editing.id}/`, payload, "Plan");
-        // Update local state immediately
-        setPlans((prev) =>
-          prev.map((p) => (p.id === editing.id ? { ...p, ...formData } : p))
-        );
+        await patchData(`/plans/create/${editing.id}/`, payload, "Plan");
       } else {
-        const res = await postData("/plans/create/", payload, "Plan");
-        // Add new item locally (if response has data)
-        if (res && res.data) {
-          setPlans((prev) => [...prev, res.data]);
-        }
+        await postData("/plans/create/", payload, "Plan");
       }
 
+      await refetchResource("subscriptions", "/plans/");
       setOpen(false);
       setEditing(null);
     } catch (error) {

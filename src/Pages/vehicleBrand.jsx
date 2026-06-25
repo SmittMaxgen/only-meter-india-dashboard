@@ -1,5 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
-import { PencilIcon,TrashIcon,PlusIcon,XMarkIcon} from "@heroicons/react/24/outline";
+import {
+  PencilIcon,
+  TrashIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 import Swal from "sweetalert2";
 
@@ -61,27 +66,32 @@ function Modal({ title, open, onClose, onSave, initial }) {
       <div className="relative max-w-2xl mx-auto mt-16 bg-white rounded-xl shadow-xl">
         <div className="flex items-center justify-between p-4">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <button className="p-2 hover:bg-gray-100 rounded-md" onClick={onClose}>
+          <button
+            className="p-2 hover:bg-gray-100 rounded-md"
+            onClick={onClose}
+          >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
         <div className="p-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-            {[
-              ["Brand", "name", "Enter Vehicle Brand"],
-            ].map(([label, key, placeholder]) => (
-              <div key={key}>
-                <label className="block text-sm font-semibold mb-1">
-                  {label}
-                </label>
-                <input
-                  value={form[key]}
-                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                  placeholder={placeholder}
-                  className="w-full border rounded-lg px-3 py-2"
-                />
-              </div>
-            ))}
+            {[["Brand", "name", "Enter Vehicle Brand"]].map(
+              ([label, key, placeholder]) => (
+                <div key={key}>
+                  <label className="block text-sm font-semibold mb-1">
+                    {label}
+                  </label>
+                  <input
+                    value={form[key]}
+                    onChange={(e) =>
+                      setForm({ ...form, [key]: e.target.value })
+                    }
+                    placeholder={placeholder}
+                    className="w-full border rounded-lg px-3 py-2"
+                  />
+                </div>
+              ),
+            )}
           </div>
         </div>
         <div className="flex items-center justify-end gap-3 p-4">
@@ -109,10 +119,15 @@ function Modal({ title, open, onClose, onSave, initial }) {
 }
 
 export default function VehicleBrand() {
-  const { fetchedData, postData, patchData, deleteData } = useAppContext();
+  const { fetchedData, postData, patchData, deleteData, refetchResource } =
+    useAppContext();
   const [brand, setBrand] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  useEffect(() => {
+    refetchResource("brands", "/brand/");
+  }, []);
 
   useEffect(() => {
     setBrand(fetchedData.brands || []);
@@ -134,20 +149,14 @@ export default function VehicleBrand() {
       Object.entries(formData).forEach(([k, v]) => payload.append(k, v));
 
       if (editing) {
-        const res = await patchData(`/brand/${editing.id}/`, payload, "Brand");
-        // Update local state immediately
-        setBrand((prev) =>
-          prev.map((v) => (v.id === editing.id ? { ...v, ...formData } : v))
-        );
+        await patchData(`/brand/${editing.id}/`, payload, "Brand");
       } else {
-        const res = await postData("/brand/", payload, "Brand");
-        // Add new item locally (if response has data)
-        if (res) {
-          setBrand((prev) => [...prev, res.data || res]);
-        }
+        await postData("/brand/", payload, "Brand");
       }
 
+      await refetchResource("brands", "/brand/");
       setOpen(false);
+      setEditing(null);
       setEditing(null);
     } catch (error) {
       console.error("Save Error:", error);
@@ -157,8 +166,7 @@ export default function VehicleBrand() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/brand/${id}/`);
-      // Remove deleted row immediately
-      setBrand((prev) => prev.filter((v) => v.id !== id));
+      await refetchResource("brands", "/brand/");
     } catch (error) {
       console.error("Delete Error:", error);
     }

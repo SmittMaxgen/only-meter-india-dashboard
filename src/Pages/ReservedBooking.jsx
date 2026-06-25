@@ -1,8 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../Central_Store/app_context.jsx";
-import { MagnifyingGlassIcon,TrashIcon } from "@heroicons/react/24/outline";
- 
+import { MagnifyingGlassIcon, TrashIcon } from "@heroicons/react/24/outline";
+
 const getStatusChip = (status) => {
   switch (status) {
     case "accept":
@@ -37,7 +37,7 @@ const getStatusChip = (status) => {
       );
   }
 };
- 
+
 const EyeIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -55,9 +55,9 @@ const EyeIcon = () => (
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
- 
+
 export default function CabBooking() {
-  const { fetchedData, deleteData } = useAppContext();
+  const { fetchedData, deleteData, refetchResource } = useAppContext();
   const [rides, setRides] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -65,44 +65,46 @@ export default function CabBooking() {
   const pageSize = 10;
 
   useEffect(() => {
+    refetchResource("rides", "/ride_request/");
+  }, []);
+
+  useEffect(() => {
     const normalRides = (fetchedData?.rides || []).filter(
-      (ride) => ride.ride_type === "reserve"
+      (ride) => ride.ride_type === "reserve",
     );
     setRides(normalRides);
     console.log(normalRides);
   }, [fetchedData?.rides]);
 
-
   const filtered = useMemo(() => {
-  if (!rides.length) return [];
+    if (!rides.length) return [];
 
-  const q = query.toLowerCase();
+    const q = query.toLowerCase();
 
-  return rides.filter((ride) => {
-    // --- Search Filter ---
-    const matchesSearch =
-      ride.user_data.full_name?.toLowerCase().includes(q) ||
-      ride.vehicle_type_data?.model?.toLowerCase().includes(q) ||
-      ride.driver_data?.name?.toLowerCase().includes(q);
+    return rides.filter((ride) => {
+      // --- Search Filter ---
+      const matchesSearch =
+        ride.user_data.full_name?.toLowerCase().includes(q) ||
+        ride.vehicle_type_data?.model?.toLowerCase().includes(q) ||
+        ride.driver_data?.name?.toLowerCase().includes(q);
 
-    // --- Status Filter ---
-    let statusMatch = true;
-    if (statusFilter !== "all") {
-      statusMatch =
-        ride.status?.toLowerCase() === statusFilter.toLowerCase();
-    }
+      // --- Status Filter ---
+      let statusMatch = true;
+      if (statusFilter !== "all") {
+        statusMatch = ride.status?.toLowerCase() === statusFilter.toLowerCase();
+      }
 
-    return matchesSearch && statusMatch;
-  });
-}, [rides, query, statusFilter]);
+      return matchesSearch && statusMatch;
+    });
+  }, [rides, query, statusFilter]);
 
-const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
-const current = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const current = filtered.slice((page - 1) * pageSize, page * pageSize);
 
-const handleDelete = async (id) => {
+  const handleDelete = async (id) => {
     try {
       await deleteData(`/ride_request/${id}/`);
-      setRides((prev) => prev.filter((d) => d.id !== id));
+      await refetchResource("rides", "/ride_request/");
     } catch (err) {
       console.error("Delete failed:", err);
     }
@@ -119,10 +121,11 @@ const handleDelete = async (id) => {
               Reserved Cab Bookings
             </h1>
             <div className="text-sm text-gray-500">
-              Dashboard <span className="text-orange-500">/ Reserved Cab Booking</span>
+              Dashboard{" "}
+              <span className="text-orange-500">/ Reserved Cab Booking</span>
             </div>
           </div>
- 
+
           {/* Right: Search + Filters */}
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             {/* Search */}
@@ -139,7 +142,7 @@ const handleDelete = async (id) => {
               />
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
- 
+
             {/* Status Filter */}
             <select
               value={statusFilter}
@@ -155,63 +158,69 @@ const handleDelete = async (id) => {
           </div>
         </div>
       </div>
- 
+
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-50 text-gray-700">
-            <tr className="text-left">
-              <th className="px-4 py-3 font-medium">Customer Name</th>
-              <th className="px-4 py-3 font-medium">Driver Name</th>
-              <th className="px-4 py-3 font-medium">Vehicle</th>
-              <th className="px-4 py-3 font-medium">Payment Mode</th>
-              <th className="px-4 py-3 font-medium">Booking Status</th>
-              <th className="px-4 py-3 font-medium">Km</th> 
-              <th className="px-4 py-3 font-medium">Total</th>
-              <th className="px-4 py-3 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {current.length > 0 ? (
-              current.map((booking) => (
-                <tr
-                  key={booking.orderId}
-                  className="border-t border-gray-100"
-                >
-                  <td className="px-4 py-3">{booking.user_data.full_name}</td>
-                  <td className="px-4 py-3">{booking.driver_data?.name || "-"}</td>
-                  <td className="px-4 py-3">{booking.vehicle_type_data?.type_data?.name || "-"}</td>
-                  <td className="px-4 py-3">{booking.paymentmode}</td>
-                  <td className="px-4 py-3">{getStatusChip(booking.status)}</td>
-                  <td className="px-4 py-3">{booking.distance_km || "-"}</td>
-                  <td className="px-4 py-3">{booking.estimated_fare}</td>
-                  <td className="px-4 py-3">
-                    <Link to={`/dashboard/cab-detail/${booking.id}`}>
-                      <button className="text-sm px-1 text-gray-700 cursor-pointer">
-                        <EyeIcon className="h-5 w-5" />
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50 text-gray-700">
+              <tr className="text-left">
+                <th className="px-4 py-3 font-medium">Customer Name</th>
+                <th className="px-4 py-3 font-medium">Driver Name</th>
+                <th className="px-4 py-3 font-medium">Vehicle</th>
+                <th className="px-4 py-3 font-medium">Payment Mode</th>
+                <th className="px-4 py-3 font-medium">Booking Status</th>
+                <th className="px-4 py-3 font-medium">Km</th>
+                <th className="px-4 py-3 font-medium">Total</th>
+                <th className="px-4 py-3 font-medium">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {current.length > 0 ? (
+                current.map((booking) => (
+                  <tr
+                    key={booking.orderId}
+                    className="border-t border-gray-100"
+                  >
+                    <td className="px-4 py-3">{booking.user_data.full_name}</td>
+                    <td className="px-4 py-3">
+                      {booking.driver_data?.name || "-"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {booking.vehicle_type_data?.type_data?.name || "-"}
+                    </td>
+                    <td className="px-4 py-3">{booking.paymentmode}</td>
+                    <td className="px-4 py-3">
+                      {getStatusChip(booking.status)}
+                    </td>
+                    <td className="px-4 py-3">{booking.distance_km || "-"}</td>
+                    <td className="px-4 py-3">{booking.estimated_fare}</td>
+                    <td className="px-4 py-3">
+                      <Link to={`/dashboard/cab-detail/${booking.id}`}>
+                        <button className="text-sm px-1 text-gray-700 cursor-pointer">
+                          <EyeIcon className="h-5 w-5" />
+                        </button>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(booking.id)}
+                        className="text-sm px-1 text-red-600 cursor-pointer"
+                      >
+                        <TrashIcon className="h-5 w-5" />
                       </button>
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(booking.id)}
-                      className="text-sm px-1 text-red-600 cursor-pointer"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="text-center py-6 text-gray-500">
+                    No bookings found for the selected filters.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center py-6 text-gray-500">
-                  No bookings found for the selected filters.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
         </div>
- 
+
         {/* Pagination */}
         <div className="flex items-center justify-center gap-2 p-4">
           {/* Previous */}
@@ -240,7 +249,9 @@ const handleDelete = async (id) => {
                   key={num}
                   onClick={() => setPage(num)}
                   className={`px-3 py-1 rounded text-sm border ${
-                    page === num ? "bg-orange-500 text-white border-orange-500" : "bg-white"
+                    page === num
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "bg-white"
                   }`}
                 >
                   {num}

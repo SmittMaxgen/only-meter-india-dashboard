@@ -1,5 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
-import { PencilIcon,TrashIcon,PlusIcon,XMarkIcon} from "@heroicons/react/24/outline";
+import {
+  PencilIcon,
+  TrashIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 import Swal from "sweetalert2";
 
@@ -25,7 +30,16 @@ function Header({ onAdd }) {
   );
 }
 
-function Modal({ title, open, onClose, onSave, initial, brands, models, types }) {
+function Modal({
+  title,
+  open,
+  onClose,
+  onSave,
+  initial,
+  brands,
+  models,
+  types,
+}) {
   const [form, setForm] = useState({
     brand: "",
     model: "",
@@ -85,7 +99,9 @@ function Modal({ title, open, onClose, onSave, initial, brands, models, types })
   }
 
   // Filter models based on selected brand
-  const filteredModels = models.filter(model => model.brand_data?.id == form.brand);
+  const filteredModels = models.filter(
+    (model) => model.brand_data?.id == form.brand,
+  );
 
   return (
     <div className="fixed inset-0 z-50">
@@ -93,7 +109,10 @@ function Modal({ title, open, onClose, onSave, initial, brands, models, types })
       <div className="relative max-w-2xl mx-auto mt-16 bg-white rounded-xl shadow-xl">
         <div className="flex items-center justify-between p-4">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <button className="p-2 hover:bg-gray-100 rounded-md" onClick={onClose}>
+          <button
+            className="p-2 hover:bg-gray-100 rounded-md"
+            onClick={onClose}
+          >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
@@ -105,11 +124,11 @@ function Modal({ title, open, onClose, onSave, initial, brands, models, types })
               <select
                 value={form.brand}
                 onChange={(e) => {
-                  setForm({ 
-                    ...form, 
+                  setForm({
+                    ...form,
                     brand: e.target.value,
                     model: "", // Reset model when brand changes
-                    type: ""   // Reset type when brand changes
+                    type: "", // Reset type when brand changes
                   });
                 }}
                 className="w-full border rounded-lg px-3 py-2 bg-white"
@@ -129,10 +148,10 @@ function Modal({ title, open, onClose, onSave, initial, brands, models, types })
               <select
                 value={form.model}
                 onChange={(e) => {
-                  setForm({ 
-                    ...form, 
+                  setForm({
+                    ...form,
                     model: e.target.value,
-                    type: "" // Reset type when model changes
+                    type: "", // Reset type when model changes
                   });
                 }}
                 disabled={!form.brand}
@@ -212,13 +231,21 @@ function Modal({ title, open, onClose, onSave, initial, brands, models, types })
 }
 
 export default function Vehicle() {
-  const { fetchedData, postData, patchData, deleteData } = useAppContext();
+  const { fetchedData, postData, patchData, deleteData, refetchResource } =
+    useAppContext();
   const [vehicles, setVehicles] = useState([]);
   const [brands, setBrands] = useState([]);
   const [models, setModels] = useState([]);
   const [types, setTypes] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  useEffect(() => {
+    refetchResource("vehicle", "/vehicle/");
+    refetchResource("brands", "/brand/");
+    refetchResource("models", "/model/");
+    refetchResource("types", "/type/");
+  }, []);
 
   // Fetch all data from context
   useEffect(() => {
@@ -242,34 +269,26 @@ export default function Vehicle() {
     try {
       // Create FormData
       const payload = new FormData();
-      
+
       // For brand, model, and type, send as JSON strings
-      payload.append('brand_data', formData.brand);
-      payload.append('model_data', formData.model);
-      payload.append('type_data', formData.type);
-      payload.append('vehicleMode', formData.vehicleMode);
-      payload.append('seats', formData.seats);
-      payload.append('fuelType', formData.fuelType);
-      payload.append('baseFare', formData.baseFare);
-      payload.append('perKmRate', formData.perKmRate);
+      payload.append("brand_data", formData.brand);
+      payload.append("model_data", formData.model);
+      payload.append("type_data", formData.type);
+      payload.append("vehicleMode", formData.vehicleMode);
+      payload.append("seats", formData.seats);
+      payload.append("fuelType", formData.fuelType);
+      payload.append("baseFare", formData.baseFare);
+      payload.append("perKmRate", formData.perKmRate);
 
       if (editing) {
-        const res = await patchData(`/vehicle/${editing.id}/`, payload, "Vehicle");
-        // Update local state immediately
-        setVehicles((prev) =>
-          prev.map((v) => (v.id === editing.id ? { ...v, ...formData } : v))
-        );
+        await patchData(`/vehicle/${editing.id}/`, payload, "Vehicle");
       } else {
-        const res = await postData("/vehicle/", payload, "Vehicle");
-        // Add new item locally (if response has data)
-        if (res) {
-          setVehicles((prev) => [res.data || res ,...prev]);
-        }
+        await postData("/vehicle/", payload, "Vehicle");
       }
 
+      await refetchResource("vehicle", "/vehicle/");
       setOpen(false);
       setEditing(null);
-      
     } catch (error) {
       console.error("Save Error:", error);
       Swal.fire({
@@ -282,8 +301,7 @@ export default function Vehicle() {
 
   const handleDelete = async (id) => {
     await deleteData(`/vehicle/${id}/`);
-    // Remove deleted row immediately
-    setVehicles((prev) => prev.filter((v) => v.id !== id));
+    await refetchResource("vehicle", "/vehicle/");
   };
 
   return (

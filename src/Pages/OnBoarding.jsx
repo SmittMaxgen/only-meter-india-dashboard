@@ -36,7 +36,10 @@ function Header({ onAdd }) {
 function UploadBox({ value, onChange }) {
   const preview = useMemo(() => {
     if (!value) return "";
-    if (typeof value === "string") return value.startsWith("http") ? value : `https://adminapi.onlymeterindia.com/${value}`;
+    if (typeof value === "string")
+      return value.startsWith("http")
+        ? value
+        : `https://adminapi.onlymeterindia.com/${value}`;
     if (value instanceof File) return URL.createObjectURL(value);
     return "";
   }, [value]);
@@ -158,10 +161,15 @@ function Modal({ title = "OnBoarding", open, onClose, onSave, initial }) {
 
 /* ----------------------------- MAIN COMPONENT ----------------------------- */
 export default function Banner() {
-  const { fetchedData, postData, patchData, deleteData } = useAppContext();
+  const { fetchedData, postData, patchData, deleteData, refetchResource } =
+    useAppContext();
   const [onboarding, setOnboarding] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  useEffect(() => {
+    refetchResource("onboardings", "/onboarding/");
+  }, []);
 
   useEffect(() => {
     setOnboarding(fetchedData.onboardings || []);
@@ -190,27 +198,13 @@ export default function Banner() {
       Object.entries(formData).forEach(([key, value]) => {
         if (key !== "image") payload.append(key, value);
       });
-
       if (editing) {
-        // keep old image if not updated
-        const res = await patchData(
-          `/onboarding/${editing.id}/`,
-          payload,
-          "OnBoarding"
-        );
-
-        setOnboarding((prev) =>
-          prev.map((v) =>
-            v.id === editing.id
-              ? { ...v, ...formData, image: formData.image || v.image }
-              : v
-          )
-        );
+        await patchData(`/onboarding/${editing.id}/`, payload, "OnBoarding");
       } else {
-        const res = await postData("/onboarding/", payload, "OnBoarding");
-        if (res && res.data) setOnboarding((prev) => [...prev, res.data]);
+        await postData("/onboarding/", payload, "OnBoarding");
       }
 
+      await refetchResource("onboardings", "/onboarding/");
       setOpen(false);
       setEditing(null);
     } catch (error) {
@@ -221,7 +215,7 @@ export default function Banner() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/onboarding/${id}/`);
-      setOnboarding((prev) => prev.filter((v) => v.id !== id));
+      await refetchResource("onboardings", "/onboarding/");
     } catch (error) {
       console.error("Delete Error:", error);
     }

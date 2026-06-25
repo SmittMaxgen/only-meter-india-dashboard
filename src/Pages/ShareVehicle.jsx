@@ -37,7 +37,7 @@ const getStatusChip = (status) => {
       );
   }
 };
- 
+
 const EyeIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -55,14 +55,18 @@ const EyeIcon = () => (
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
- 
+
 export default function ShareVehicle() {
-  const { fetchedData, deleteData } = useAppContext();
+  const { fetchedData, deleteData, refetchResource } = useAppContext();
   const [rides, setRides] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const pageSize = 10;
+
+  useEffect(() => {
+    refetchResource("shareVehicles", "/vehicle_share_requests/");
+  }, []);
 
   useEffect(() => {
     setRides(fetchedData.shareVehicles || []);
@@ -99,7 +103,7 @@ export default function ShareVehicle() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/vehicle_share_requests/${id}/`);
-      setRides((prev) => prev.filter((d) => d.id !== id));
+      await refetchResource("shareVehicles", "/vehicle_share_requests/");
     } catch (err) {
       console.error("Delete failed:", err);
     }

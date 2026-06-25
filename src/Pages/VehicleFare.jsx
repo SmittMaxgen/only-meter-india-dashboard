@@ -596,8 +596,8 @@ function Modal({
 
 /* ----------------------------- MAIN COMPONENT ----------------------------- */
 export default function VehicleFare() {
-  const { postData, patchData, deleteData, fetchedData } = useAppContext();
-
+  const { postData, patchData, deleteData, fetchedData, refetchResource } =
+    useAppContext();
   // Extract only name strings from types objects
   const NAME_OPTIONS =
     fetchedData.types?.map((item) => item?.name).filter(Boolean) || [];
@@ -636,6 +636,7 @@ export default function VehicleFare() {
 
   useEffect(() => {
     fetchFares();
+    refetchResource("types", "/type/");
   }, []);
 
   const handleFilterName = (e) => {

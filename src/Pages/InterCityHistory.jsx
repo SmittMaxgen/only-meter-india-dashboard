@@ -57,12 +57,16 @@ const EyeIcon = () => (
 );
 
 export default function CabBooking() {
-  const { fetchedData, deleteData } = useAppContext();
+  const { fetchedData, deleteData, refetchResource } = useAppContext();
   const [rides, setRides] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const pageSize = 10;
+
+  useEffect(() => {
+    refetchResource("rides", "/ride_request/");
+  }, []);
 
   useEffect(() => {
     const normalRides = (fetchedData?.rides || []).filter(
@@ -100,7 +104,7 @@ export default function CabBooking() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/ride_request/${id}/`);
-      setRides((prev) => prev.filter((d) => d.id !== id));
+      await refetchResource("rides", "/ride_request/");
     } catch (err) {
       console.error("Delete failed:", err);
     }

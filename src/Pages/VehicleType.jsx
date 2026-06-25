@@ -90,7 +90,8 @@ function Modal({ title, open, onClose, onSave, initial }) {
                     className="w-full border rounded-lg px-3 py-2"
                   />
                 </div>
-              ))}
+              ),
+            )}
           </div>
         </div>
         <div className="flex items-center justify-end gap-3 p-4">
@@ -118,10 +119,15 @@ function Modal({ title, open, onClose, onSave, initial }) {
 }
 
 export default function VehicleType() {
-  const { fetchedData, postData, patchData, deleteData } = useAppContext();
+  const { fetchedData, postData, patchData, deleteData, refetchResource } =
+    useAppContext();
   const [type, setType] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  useEffect(() => {
+    refetchResource("types", "/type/");
+  }, []);
 
   useEffect(() => {
     setType(fetchedData.types || []);
@@ -143,20 +149,14 @@ export default function VehicleType() {
       Object.entries(formData).forEach(([k, v]) => payload.append(k, v));
 
       if (editing) {
-        const res = await patchData(`/type/${editing.id}/`, payload, "Type");
-        // Update local state immediately
-        setType((prev) =>
-          prev.map((v) => (v.id === editing.id ? { ...v, ...formData } : v))
-        );
+        await patchData(`/type/${editing.id}/`, payload, "Type");
       } else {
-        const res = await postData("/type/", payload, "Type");
-        // Add new item locally (if response has data)
-        if (res) {
-          setType((prev) => [...prev, res.data || res]);
-        }
+        await postData("/type/", payload, "Type");
       }
 
+      await refetchResource("types", "/type/");
       setOpen(false);
+      setEditing(null);
       setEditing(null);
     } catch (error) {
       console.error("Save Error:", error);
@@ -166,8 +166,7 @@ export default function VehicleType() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/type/${id}/`);
-      // Remove deleted row immediately
-      setType((prev) => prev.filter((v) => v.id !== id));
+      await refetchResource("types", "/type/");
     } catch (error) {
       console.error("Delete Error:", error);
     }

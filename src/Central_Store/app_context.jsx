@@ -221,6 +221,11 @@ export const AppProvider = ({ children }) => {
   };
 
   // Get location name from latitude and longitude
+  const refetchResource = async (key, endpoint) => {
+    const data = await getData(endpoint);
+    setFetchedData((prev) => ({ ...prev, [key]: data }));
+  };
+
   const getLocationFromCoords = async (lat, lng) => {
     try {
       const res = await fetch(
@@ -251,6 +256,7 @@ export const AppProvider = ({ children }) => {
         setFetchedData,
         getLocationFromCoords,
         getServicesData,
+        refetchResource,
       }}
     >
       {children}

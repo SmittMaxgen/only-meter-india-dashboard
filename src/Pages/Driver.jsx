@@ -219,12 +219,16 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 
 export default function Drivers() {
-  const { fetchedData, deleteData } = useAppContext();
+  const { fetchedData, deleteData, refetchResource } = useAppContext();
   const [drivers, setDrivers] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const pageSize = 10;
+
+  useEffect(() => {
+    refetchResource("drivers", "/driver/");
+  }, []);
 
   useEffect(() => {
     const normalRides = fetchedData?.drivers || [];
@@ -249,7 +253,7 @@ export default function Drivers() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/driver/${id}/`);
-      setDrivers((prev) => prev.filter((d) => d.id !== id));
+      await refetchResource("drivers", "/driver/");
     } catch (err) {
       console.error("Delete failed:", err);
     }

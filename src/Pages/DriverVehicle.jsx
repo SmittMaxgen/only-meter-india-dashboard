@@ -201,12 +201,16 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 
 export default function DriverVehicles() {
-  const { fetchedData, deleteData } = useAppContext();
+  const { fetchedData, deleteData, refetchResource } = useAppContext();
   const [driverVehicleData, setDriverVehicleData] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const pageSize = 10;
+
+  useEffect(() => {
+    refetchResource("driverVehicles", "/driver_vehicle/");
+  }, []);
 
   useEffect(() => {
     setDriverVehicleData(fetchedData.driverVehicles || []);
@@ -229,7 +233,7 @@ export default function DriverVehicles() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/driver_vehicle/${id}/`);
-      setDriverVehicleData((prev) => prev.filter((d) => d.id !== id));
+      await refetchResource("driverVehicles", "/driver_vehicle/");
     } catch (err) {
       console.error("Delete failed:", err);
     }

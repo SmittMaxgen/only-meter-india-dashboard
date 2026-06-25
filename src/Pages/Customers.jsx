@@ -163,11 +163,15 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 
 export default function Customers() {
-  const { fetchedData, deleteData } = useAppContext();
+  const { fetchedData, deleteData, refetchResource } = useAppContext();
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
+  useEffect(() => {
+    refetchResource("users", "/user/");
+  }, []);
 
   useEffect(() => {
     setUsers(fetchedData.users || []);
@@ -190,7 +194,7 @@ export default function Customers() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/user/${id}/`);
-      setUsers((prev) => prev.filter((d) => d.id !== id));
+      await refetchResource("users", "/user/");
     } catch (err) {
       console.error("Delete failed:", err);
     }

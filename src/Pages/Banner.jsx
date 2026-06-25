@@ -36,7 +36,10 @@ function Header({ onAdd }) {
 function UploadBox({ value, onChange }) {
   const preview = useMemo(() => {
     if (!value) return "";
-    if (typeof value === "string") return value.startsWith("http") ? value : `https://adminapi.onlymeterindia.com/${value}`;
+    if (typeof value === "string")
+      return value.startsWith("http")
+        ? value
+        : `https://adminapi.onlymeterindia.com/${value}`;
     if (value instanceof File) return URL.createObjectURL(value);
     return "";
   }, [value]);
@@ -113,7 +116,10 @@ function Modal({ title = "Banner", open, onClose, onSave, initial }) {
         {/* Header */}
         <div className="flex items-center justify-between p-4">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-md">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-md"
+          >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
@@ -159,9 +165,7 @@ function Modal({ title = "Banner", open, onClose, onSave, initial }) {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Status
-              </label>
+              <label className="block text-sm text-gray-700 mb-1">Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -194,13 +198,17 @@ function Modal({ title = "Banner", open, onClose, onSave, initial }) {
   );
 }
 
-
 /* ----------------------------- MAIN COMPONENT ----------------------------- */
 export default function Banner() {
-  const { fetchedData, postData, patchData, deleteData } = useAppContext();
+  const { fetchedData, postData, patchData, deleteData, refetchResource } =
+    useAppContext();
   const [banners, setBanners] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  useEffect(() => {
+    refetchResource("banners", "/ads_banner/");
+  }, []);
 
   useEffect(() => {
     setBanners(fetchedData.banners || []);
@@ -230,26 +238,34 @@ export default function Banner() {
         if (key !== "image_id") payload.append(key, value);
       });
 
-      if (editing) {
-        // keep old image if not updated
-        const res = await patchData(
-          `/ads_banner/${editing.id}/`,
-          payload,
-          "Banner"
-        );
+      // if (editing) {
+      //   // keep old image if not updated
+      //   const res = await patchData(
+      //     `/ads_banner/${editing.id}/`,
+      //     payload,
+      //     "Banner",
+      //   );
 
-        setBanners((prev) =>
-          prev.map((v) =>
-            v.id === editing.id
-              ? { ...v, ...formData, image: formData.image || v.image }
-              : v
-          )
-        );
+      //   setBanners((prev) =>
+      //     prev.map((v) =>
+      //       v.id === editing.id
+      //         ? { ...v, ...formData, image: formData.image || v.image }
+      //         : v,
+      //     ),
+      //   );
+      // } else {
+      //   const res = await postData("/ads_banner/", payload, "Banner");
+      //   if (res && res.data) setBanners((prev) => [...prev, res.data]);
+      // }
+
+      // setOpen(false);
+      if (editing) {
+        await patchData(`/ads_banner/${editing.id}/`, payload, "Banner");
       } else {
-        const res = await postData("/ads_banner/", payload, "Banner");
-        if (res && res.data) setBanners((prev) => [...prev, res.data]);
+        await postData("/ads_banner/", payload, "Banner");
       }
 
+      await refetchResource("banners", "/ads_banner/");
       setOpen(false);
       setEditing(null);
     } catch (error) {
@@ -260,7 +276,7 @@ export default function Banner() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/ads_banner/${id}/`);
-      setBanners((prev) => prev.filter((v) => v.id !== id));
+      await refetchResource("banners", "/ads_banner/");
     } catch (error) {
       console.error("Delete Error:", error);
     }
@@ -277,7 +293,9 @@ export default function Banner() {
               <tr>
                 <th className="px-4 py-3 font-medium text-left">Image</th>
                 <th className="px-4 py-3 font-medium text-left">Title</th>
-                <th className="px-4 py-3 font-medium text-left">Redirect Url</th>
+                <th className="px-4 py-3 font-medium text-left">
+                  Redirect Url
+                </th>
                 <th className="px-4 py-3 font-medium text-left">Priority</th>
                 <th className="px-4 py-3 font-medium text-left">Status</th>
                 <th className="px-4 py-3 font-medium text-left">Actions</th>
@@ -305,9 +323,7 @@ export default function Banner() {
                   <td className="px-4 py-3 text-gray-700">
                     {r.priority || "-"}
                   </td>
-                  <td className="px-4 py-3 text-gray-700">
-                    {r.status || "-"}
-                  </td>
+                  <td className="px-4 py-3 text-gray-700">{r.status || "-"}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button

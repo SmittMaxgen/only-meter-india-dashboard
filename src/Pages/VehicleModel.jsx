@@ -167,13 +167,18 @@ function Modal({ title, open, onClose, onSave, initial, brands }) {
 
 /* ----------------------------- MAIN COMPONENT ----------------------------- */
 export default function VehicleModel() {
-  const { fetchedData, postData, patchData, deleteData } = useAppContext();
-
+  const { fetchedData, postData, patchData, deleteData, refetchResource } =
+    useAppContext();
   const [models, setModels] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
   const brandsList = fetchedData.brands || [];
+
+  useEffect(() => {
+    refetchResource("models", "/model/");
+    refetchResource("brands", "/brand/");
+  }, []);
 
   useEffect(() => {
     setModels(fetchedData.models || []);
@@ -196,24 +201,11 @@ export default function VehicleModel() {
 
       if (editing) {
         await patchData(`/model/${editing.id}/`, payload, "Vehicle Model");
-
-        const selectedBrand = fetchedData.brands.find(
-          (b) => b.id === Number(formData.brand_data),
-        );
-
-        setModels((prev) =>
-          prev.map((v) =>
-            v.id === editing.id
-              ? { ...v, name: formData.name, brand_data: selectedBrand }
-              : v,
-          ),
-        );
       } else {
-        const res = await postData("/model/", payload, "Vehicle Model");
-        if (res) {
-          setModels((prev) => [...prev, res.data || res]);
-        }
+        await postData("/model/", payload, "Vehicle Model");
       }
+
+      await refetchResource("models", "/model/");
       setOpen(false);
       setEditing(null);
     } catch (error) {
@@ -224,7 +216,7 @@ export default function VehicleModel() {
   const handleDelete = async (id) => {
     try {
       await deleteData(`/model/${id}/`);
-      setModels((prev) => prev.filter((v) => v.id !== id));
+      await refetchResource("models", "/model/");
     } catch (error) {
       console.error("Delete Error:", error);
     }

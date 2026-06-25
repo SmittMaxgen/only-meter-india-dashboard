@@ -37,13 +37,17 @@ const getStatusChip = (status) => {
 };
 
 export default function DriverSubscription() {
-  const { fetchedData } = useAppContext();
+  const { fetchedData, refetchResource } = useAppContext();
   const [driverSubscriptionData, setDriverSubscriptionData] = useState([]);
   console.log("driverSubscriptionData::::::>>>>>", driverSubscriptionData);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false); // ✅ new state
   const pageSize = 10;
+
+  useEffect(() => {
+    refetchResource("driverSubscriptions", "/subscriptions/");
+  }, []);
 
   // ✅ Load data from context
   useEffect(() => {
