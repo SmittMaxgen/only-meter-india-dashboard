@@ -518,6 +518,16 @@ export default function Sidebar({ isOpen, onClose }) {
           },
         ],
       },
+      {
+        title: "Agent Management",
+        items: [
+          {
+            label: "Agents",
+            to: "/dashboard/agents",
+            icon: TicketIcon,
+          },
+        ],
+      },
     ],
     [],
   );
