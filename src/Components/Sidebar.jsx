@@ -519,10 +519,10 @@ export default function Sidebar({ isOpen, onClose }) {
         ],
       },
       {
-        title: "Agent Management",
+        title: "Customer Support Agent Management",
         items: [
           {
-            label: "Agents",
+            label: "Customer Support Agents",
             to: "/dashboard/agents",
             icon: TicketIcon,
           },

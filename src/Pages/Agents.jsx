@@ -199,9 +199,9 @@ export default function Agents() {
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">Agents</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Customer Support Agents</h1>
             <div className="text-sm text-gray-500">
-              Dashboard <span className="text-orange-500">/ Agents</span>
+              Dashboard <span className="text-orange-500">/ Customer Support Agents</span>
             </div>
           </div>
 
