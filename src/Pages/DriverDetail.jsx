@@ -27,12 +27,19 @@ export default function DriverDetail() {
       const data = await res.json();
       const driverData = data.data || data;
 
-      const location = await getLocationFromCoords(
-        driverData?.lat,
-        driverData?.lng,
-      );
+      // Set driver immediately so the page renders even if
+      // reverse-geocoding below fails or is slow.
+      setDriver({ ...driverData, location: null });
 
-      setDriver({ ...driverData, location });
+      try {
+        const location = await getLocationFromCoords(
+          driverData?.lat,
+          driverData?.lng,
+        );
+        setDriver((prev) => (prev ? { ...prev, location } : prev));
+      } catch (geoErr) {
+        console.error("Location lookup failed:", geoErr);
+      }
     };
 
     const fetchSummary = async () => {
@@ -160,9 +167,15 @@ export default function DriverDetail() {
       {/* Personal + Vehicle */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <InfoCard title="Personal Details">
-          <Detail label="Name" value={driver.name} />
+          <Detail
+            label="Name"
+            value={`${driver.first_name || ""} ${driver.last_name || ""}`.trim()}
+          />
           <Detail label="Email" value={driver.email} />
           <Detail label="Phone" value={driver.phone} />
+          <Detail label="City" value={driver.city} />
+          <Detail label="State" value={driver.state} />
+          <Detail label="Country" value={driver.country} />
           <Detail label="Status" value={driver.status} />
           <Detail
             label="Created At"
