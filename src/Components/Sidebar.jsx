@@ -357,18 +357,18 @@ export default function Sidebar({ isOpen, onClose }) {
               },
             ],
           },
-          {
-            key: "share-vehicles",
-            label: "Share Vehicles",
-            icon: ClipboardDocumentListIcon,
-            children: [
-              {
-                label: "Share Vehicles",
-                to: "/dashboard/share-vehicles",
-                icon: ClipboardDocumentListIcon,
-              },
-            ],
-          },
+          // {
+          //   key: "share-vehicles",
+          //   label: "Share Vehicles",
+          //   icon: ClipboardDocumentListIcon,
+          //   children: [
+          //     {
+          //       label: "Share Vehicles",
+          //       to: "/dashboard/share-vehicles",
+          //       icon: ClipboardDocumentListIcon,
+          //     },
+          //   ],
+          // },
         ],
       },
       {
