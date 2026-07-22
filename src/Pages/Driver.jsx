@@ -219,16 +219,59 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 
 export default function Drivers() {
-  const { fetchedData, deleteData, refetchResource, baseUrl } = useAppContext();
+  const { fetchedData, deleteData, refetchResource, baseUrl, getData } =
+    useAppContext();
   const [drivers, setDrivers] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const pageSize = 10;
 
+  // Location filters
+  const [cityFilter, setCityFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
+  const [filterLoading, setFilterLoading] = useState(false);
+
   useEffect(() => {
     refetchResource("drivers", "/driver/");
   }, []);
+
+  // Debounced auto-filter by city/state/country
+  useEffect(() => {
+    if (!cityFilter && !stateFilter && !countryFilter) {
+      setDrivers(fetchedData?.drivers || []);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const params = new URLSearchParams();
+      if (cityFilter) params.append("city", cityFilter);
+      if (stateFilter) params.append("state", stateFilter);
+      if (countryFilter) params.append("country", countryFilter);
+      const qs = params.toString();
+
+      setFilterLoading(true);
+      try {
+        const data = await getData(`/driver/${qs ? `?${qs}` : ""}`);
+        setDrivers(data || []);
+        setPage(1);
+      } catch (err) {
+        console.error("Location filter failed:", err);
+      } finally {
+        setFilterLoading(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cityFilter, stateFilter, countryFilter]);
+
+  const clearLocationFilters = () => {
+    setCityFilter("");
+    setStateFilter("");
+    setCountryFilter("");
+  };
 
   useEffect(() => {
     const normalRides = fetchedData?.drivers || [];
@@ -334,7 +377,7 @@ export default function Drivers() {
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
 
-            {/* Export Button */}
+           {/* Export Button */}
             <button
               onClick={exportToExcel}
               disabled={filtered.length === 0}
@@ -345,6 +388,43 @@ export default function Drivers() {
               Export Excel
             </button>
           </div>
+        </div>
+
+        {/* Location Filters */}
+        <div className="flex flex-col md:flex-row md:items-center gap-3 mt-4">
+          <input
+            type="text"
+            placeholder="Filter by city"
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <input
+            type="text"
+            placeholder="Filter by state"
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <input
+            type="text"
+            placeholder="Filter by country"
+            value={countryFilter}
+            onChange={(e) => setCountryFilter(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          {filterLoading && (
+            <span className="text-sm text-gray-500 whitespace-nowrap">
+              Filtering...
+            </span>
+          )}
+          <button
+            onClick={clearLocationFilters}
+            disabled={filterLoading}
+            className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+          >
+            Clear
+          </button>
         </div>
       </div>
 
@@ -360,7 +440,7 @@ export default function Drivers() {
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 text-gray-700">
                 <tr className="text-left">
-                  <th className="px-4 py-3 font-medium">Photo</th>
+                  {/* <th className="px-4 py-3 font-medium">Photo</th> */}
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Phone</th>
                   <th className="px-4 py-3 font-medium">Email</th>
@@ -376,7 +456,7 @@ export default function Drivers() {
               <tbody>
                 {current.map((r) => (
                   <tr key={r.id} className="border-t border-gray-100">
-                    <td className="px-4 py-3">
+                    {/* <td className="px-4 py-3">
                       <img
                         src={
                           r.profile_img
@@ -390,7 +470,7 @@ export default function Drivers() {
                           e.currentTarget.src = "/placeholder.png";
                         }}
                       />
-                    </td>
+                    </td> */}
                     <td className="px-4 py-3 font-medium text-gray-900">
                       {r.name || "-"}
                     </td>

@@ -163,15 +163,58 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 
 export default function Customers() {
-  const { fetchedData, deleteData, refetchResource } = useAppContext();
+  const { fetchedData, deleteData, refetchResource, getData } =
+    useAppContext();
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
+  // Location filters
+  const [cityFilter, setCityFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
+  const [filterLoading, setFilterLoading] = useState(false);
+
   useEffect(() => {
     refetchResource("users", "/user/");
   }, []);
+
+  // Debounced auto-filter by city/state/country
+  useEffect(() => {
+    if (!cityFilter && !stateFilter && !countryFilter) {
+      setUsers(fetchedData?.users || []);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const params = new URLSearchParams();
+      if (cityFilter) params.append("city", cityFilter);
+      if (stateFilter) params.append("state", stateFilter);
+      if (countryFilter) params.append("country", countryFilter);
+      const qs = params.toString();
+
+      setFilterLoading(true);
+      try {
+        const data = await getData(`/user/${qs ? `?${qs}` : ""}`);
+        setUsers(data || []);
+        setPage(1);
+      } catch (err) {
+        console.error("Location filter failed:", err);
+      } finally {
+        setFilterLoading(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cityFilter, stateFilter, countryFilter]);
+
+  const clearLocationFilters = () => {
+    setCityFilter("");
+    setStateFilter("");
+    setCountryFilter("");
+  };
 
   useEffect(() => {
     setUsers(fetchedData.users || []);
@@ -276,6 +319,43 @@ export default function Customers() {
               Export Excel
             </button>
           </div>
+        </div>
+
+        {/* Location Filters */}
+        <div className="flex flex-col md:flex-row md:items-center gap-3 mt-4">
+          <input
+            type="text"
+            placeholder="Filter by city"
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <input
+            type="text"
+            placeholder="Filter by state"
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <input
+            type="text"
+            placeholder="Filter by country"
+            value={countryFilter}
+            onChange={(e) => setCountryFilter(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          {filterLoading && (
+            <span className="text-sm text-gray-500 whitespace-nowrap">
+              Filtering...
+            </span>
+          )}
+          <button
+            onClick={clearLocationFilters}
+            disabled={filterLoading}
+            className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+          >
+            Clear
+          </button>
         </div>
       </div>
 
