@@ -219,7 +219,7 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 
 export default function Drivers() {
-  const { fetchedData, deleteData, refetchResource } = useAppContext();
+  const { fetchedData, deleteData, refetchResource, baseUrl } = useAppContext();
   const [drivers, setDrivers] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -267,6 +267,9 @@ export default function Drivers() {
       Name: r.name || "-",
       Email: r.email || "-",
       Phone: r.phone || "-",
+      City: r.city || "-",
+      State: r.state || "-",
+      Country: r.country || "-",
       Status: r.status || "-",
       Verification: r.verification || "-",
       "Vehicle Brand": r.vehicle_data?.brand_data?.name || "-",
@@ -357,9 +360,13 @@ export default function Drivers() {
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 text-gray-700">
                 <tr className="text-left">
+                  <th className="px-4 py-3 font-medium">Photo</th>
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Phone</th>
                   <th className="px-4 py-3 font-medium">Email</th>
+                  <th className="px-4 py-3 font-medium">City</th>
+                  <th className="px-4 py-3 font-medium">State</th>
+                  <th className="px-4 py-3 font-medium">Country</th>
                   <th className="px-4 py-3 font-medium">Bonus Amount</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Actions</th>
@@ -369,6 +376,21 @@ export default function Drivers() {
               <tbody>
                 {current.map((r) => (
                   <tr key={r.id} className="border-t border-gray-100">
+                    <td className="px-4 py-3">
+                      <img
+                        src={
+                          r.profile_img
+                            ? `${baseUrl}${r.profile_img}`
+                            : "/placeholder.png"
+                        }
+                        alt={r.name || "Driver"}
+                        className="h-10 w-10 rounded-full object-cover bg-gray-100"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/placeholder.png";
+                        }}
+                      />
+                    </td>
                     <td className="px-4 py-3 font-medium text-gray-900">
                       {r.name || "-"}
                     </td>
@@ -377,6 +399,15 @@ export default function Drivers() {
                     </td>
                     <td className="px-4 py-3 text-gray-700">
                       {r.email || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {r.city || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {r.state || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {r.country || "-"}
                     </td>
                     <td className="px-4 py-3 text-green-700 font-medium">
                       {r.bonus_amount || "-"}

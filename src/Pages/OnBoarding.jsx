@@ -166,6 +166,7 @@ export default function Banner() {
   const [onboarding, setOnboarding] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [baseUrl] = useState("https://adminapi.onlymeterindia.com");
 
   useEffect(() => {
     refetchResource("onboardings", "/onboarding/");
@@ -243,7 +244,7 @@ export default function Banner() {
                   <td className="px-4 py-3">
                     <div className="h-12 w-28 rounded-md overflow-hidden border">
                       <img
-                        src={`https://onlymeterindia.info/${r.image}`}
+                        src={`${baseUrl}${r.image}`}
                         alt={r.title}
                         className="h-full w-full object-cover"
                       />

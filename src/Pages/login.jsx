@@ -60,6 +60,19 @@ function LoginPage() {
 
       if (validData.email === email && validData.password) {
         localStorage.setItem("isAuth", "true");
+        localStorage.setItem("adminId", validData.id);
+
+        // Fetch full admin details (including role) by id, then store role
+        try {
+          const roleResponse = await fetch(
+            `${baseUrl}/admin_data/${validData.id}/`
+          );
+          const roleData = await roleResponse.json();
+          localStorage.setItem("role", roleData.data.role.role_name);
+        } catch (roleErr) {
+          console.log(roleErr);
+        }
+
         navigate("/dashboard/home");
         setEmail("");
         setPassword("");

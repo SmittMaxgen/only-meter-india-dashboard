@@ -215,12 +215,12 @@ export default function DriverDetail() {
             <Detail label="License Expiry Date" value={driver.license_expiry} />
             {driver.license_doc && (
               <a
-                href={`https://onlymeterindia.info${driver.license_doc}`}
+                href={`${baseUrl}${driver.license_doc}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <img
-                  src={`https://onlymeterindia.info${driver.license_doc}`}
+                  src={`${baseUrl}${driver.license_doc}`}
                   alt="License"
                   className="h-32 w-48 object-cover rounded-md border border-gray-300 cursor-pointer hover:opacity-80"
                 />

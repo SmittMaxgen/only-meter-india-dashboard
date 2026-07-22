@@ -322,6 +322,7 @@ function Group({ label, icon: Icon, children, isOpen, onToggle }) {
 
 export default function Sidebar({ isOpen, onClose }) {
   const [openGroups, setOpenGroups] = useState({});
+  const role = localStorage.getItem("role");
 
   const toggle = (key) => setOpenGroups((s) => ({ ...s, [key]: !s[key] }));
 
@@ -532,6 +533,20 @@ export default function Sidebar({ isOpen, onClose }) {
     [],
   );
 
+  // Filter sidebar sections based on logged-in admin's role
+  const visibleSections = useMemo(() => {
+    if (!role || role === "super_admin") {
+      return sections;
+    }
+    if (role === "driver_manager") {
+      return sections.filter((sec) => sec.title === "DRIVER MANAGEMENT");
+    }
+    if (role === "customer_manager") {
+      return sections.filter((sec) => sec.title === "CUSTOMER MANAGEMENT");
+    }
+    return sections;
+  }, [sections, role]);
+
   const Content = (
     <div
       className={`h-full ${WIDTH} bg-white border-r border-gray-200 flex flex-col`}
@@ -548,7 +563,7 @@ export default function Sidebar({ isOpen, onClose }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto pb-6">
-        {sections.map((sec) => (
+        {visibleSections.map((sec) => (
           <div key={sec.title}>
             <SectionTitle>{sec.title}</SectionTitle>
             <div className="space-y-1">

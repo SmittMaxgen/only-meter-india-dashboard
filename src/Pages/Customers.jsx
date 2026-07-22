@@ -208,8 +208,9 @@ export default function Customers() {
       "Full Name": r.full_name || "-",
       "Mobile No": r.mobile_no || "-",
       Email: r.email || "-",
-      State: r.address_data?.state || "-",
       City: r.address_data?.city || "-",
+      State: r.address_data?.state || "-",
+      Country: r.address_data?.country || "-",
       Latitude: r.latitude ?? "-",
       Longitude: r.longitude ?? "-",
       "Nearby Drivers": r.nearby_driver_count ?? 0,
@@ -287,7 +288,9 @@ export default function Customers() {
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Mobile no</th>
                 <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Address</th>
+                <th className="px-4 py-3 font-medium">City</th>
+                <th className="px-4 py-3 font-medium">State</th>
+                <th className="px-4 py-3 font-medium">Country</th>
                 <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
@@ -298,7 +301,13 @@ export default function Customers() {
                   <td className="px-4 py-3 text-gray-700">{r.mobile_no}</td>
                   <td className="px-4 py-3 text-gray-700">{r.email}</td>
                   <td className="px-4 py-3 text-gray-700">
+                    {r.address_data?.city ? r.address_data.city : "-"}
+                  </td>
+                  <td className="px-4 py-3 text-gray-700">
                     {r.address_data?.state ? r.address_data.state : "-"}
+                  </td>
+                  <td className="px-4 py-3 text-gray-700">
+                    {r.address_data?.country ? r.address_data.country : "-"}
                   </td>
                   <td className="px-4 py-3">
                     <Link to={`/dashboard/customer-detail/${r.user_id}`}>

@@ -35,6 +35,22 @@ import Offer from "../Pages/Offer.jsx";
 import SalesAgents from "../Pages/SalesAgents.jsx";
 import Agents from "../Pages/Agents.jsx";
 
+// Redirects non-super_admin roles away from the analytics Dashboard
+// straight to the one section they're allowed to see.
+const ROLE_HOME = {
+  driver_manager: "/dashboard/driver",
+  customer_manager: "/dashboard/customers",
+};
+
+function RoleHome() {
+  const role = localStorage.getItem("role");
+  const redirectTo = ROLE_HOME[role];
+  if (redirectTo) {
+    return <Navigate to={redirectTo} replace />;
+  }
+  return <Home />;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -48,7 +64,7 @@ export const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           { index: true, element: <Navigate to="home" replace /> },
-          { path: "home", element: <Home /> },
+          { path: "home", element: <RoleHome /> },
           { path: "cab-booking", element: <CabBooking /> },
           { path: "auto-booking", element: <AutoBooking /> },
           { path: "cab-detail/:id", element: <CabDetail /> },
