@@ -163,8 +163,7 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 
 export default function Customers() {
-  const { fetchedData, deleteData, refetchResource, getData } =
-    useAppContext();
+  const { fetchedData, deleteData, refetchResource, getData } = useAppContext();
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);

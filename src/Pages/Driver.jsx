@@ -377,7 +377,7 @@ export default function Drivers() {
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
 
-           {/* Export Button */}
+            {/* Export Button */}
             <button
               onClick={exportToExcel}
               disabled={filtered.length === 0}
@@ -472,7 +472,7 @@ export default function Drivers() {
                       />
                     </td> */}
                     <td className="px-4 py-3 font-medium text-gray-900">
-                      {r.name || "-"}
+                      {`${r.first_name} ${r.last_name}` || "-"}
                     </td>
                     <td className="px-4 py-3 text-gray-700">
                       {r.phone || "-"}
@@ -480,9 +480,7 @@ export default function Drivers() {
                     <td className="px-4 py-3 text-gray-700">
                       {r.email || "-"}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
-                      {r.city || "-"}
-                    </td>
+                    <td className="px-4 py-3 text-gray-700">{r.city || "-"}</td>
                     <td className="px-4 py-3 text-gray-700">
                       {r.state || "-"}
                     </td>
