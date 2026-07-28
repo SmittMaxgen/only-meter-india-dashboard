@@ -22,7 +22,7 @@ import ReservedBooking from "../Pages/ReservedBooking.jsx";
 import RentalRides from "../Pages/RentalRides.jsx";
 import WorkInProgress from "../Pages/WorkInProgress.jsx";
 import VehicleFare from "../Pages/VehicleFare.jsx";
-import VehicleBrand from "../Pages/vehicleBrand.jsx";
+import VehicleBrand from "../Pages/VehicleBrand.jsx";
 import VehicleModel from "../Pages/VehicleModel.jsx";
 import VehicleType from "../Pages/VehicleType.jsx";
 import Vehicle from "../Pages/Vehicle.jsx";
