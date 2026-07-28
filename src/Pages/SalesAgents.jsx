@@ -150,6 +150,7 @@ export default function SalesAgents() {
       "Agent ID": agent.agent_id || "-",
       Name: agent.name || "-",
       Mobile: agent.mobile || "-",
+      "Referral Code": agent.referral_code || "-",
       "Created At": agent.created_at
         ? new Date(agent.created_at).toLocaleString()
         : "-",
@@ -236,8 +237,11 @@ export default function SalesAgents() {
           <table className="min-w-full text-sm">
             <thead className="bg-gray-50">
               <tr className="text-left text-gray-700">
+                <th className="px-4 py-3 font-medium">Agent ID</th>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Mobile</th>
+                <th className="px-4 py-3 font-medium">Referral Code</th>
+                <th className="px-4 py-3 font-medium">Created At</th>
                 <th className="px-4 py-3 font-medium text-center">Actions</th>
               </tr>
             </thead>
@@ -247,8 +251,15 @@ export default function SalesAgents() {
                   key={agent.agent_id}
                   className="border-t border-gray-100 hover:bg-gray-50"
                 >
+                  <td className="px-4 py-3">{agent.agent_id || "-"}</td>
                   <td className="px-4 py-3 font-medium">{agent.name}</td>
                   <td className="px-4 py-3">{agent.mobile}</td>
+                  <td className="px-4 py-3">{agent.referral_code || "-"}</td>
+                  <td className="px-4 py-3">
+                    {agent.created_at
+                      ? new Date(agent.created_at).toLocaleString()
+                      : "-"}
+                  </td>
                   <td className="px-4 py-3 text-center space-x-3">
                     <button
                       onClick={() => handleEdit(agent)}
@@ -276,7 +287,7 @@ export default function SalesAgents() {
               {current.length === 0 && (
                 <tr>
                   <td
-                    colSpan={3}
+                    colSpan={6}
                     className="px-4 py-12 text-center text-gray-500"
                   >
                     No sales agents found
