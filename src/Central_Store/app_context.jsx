@@ -25,8 +25,15 @@ export const AppProvider = ({ children }) => {
     agents: null,
   });
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("accessToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const getData = async (endPoint) => {
-    const res = await fetch(`${baseUrl}${endPoint}`);
+    const res = await fetch(`${baseUrl}${endPoint}`, {
+      headers: { ...getAuthHeaders() },
+    });
     const data = await res.json();
     return data.data;
   };
@@ -35,6 +42,7 @@ export const AppProvider = ({ children }) => {
     try {
       const res = await fetch(`${baseUrl}${endPoint}`, {
         method: "POST",
+        headers: { ...getAuthHeaders() },
         body: payload, // JSON.stringify() or FormData
       });
 
@@ -77,6 +85,7 @@ export const AppProvider = ({ children }) => {
     try {
       const res = await fetch(`${baseUrl}${endPoint}`, {
         method: "PATCH",
+        headers: { ...getAuthHeaders() },
         body: payload, // FormData or JSON.stringify() depending on usage
       });
 
@@ -131,6 +140,7 @@ export const AppProvider = ({ children }) => {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            ...getAuthHeaders(),
           },
         });
 

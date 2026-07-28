@@ -61,6 +61,12 @@ function LoginPage() {
       if (validData.email === email && validData.password) {
         localStorage.setItem("isAuth", "true");
         localStorage.setItem("adminId", validData.id);
+        if (data.access) {
+          localStorage.setItem("accessToken", data.access);
+        }
+        if (data.refresh) {
+          localStorage.setItem("refreshToken", data.refresh);
+        }
 
         // Fetch full admin details (including role) by id, then store role
         try {

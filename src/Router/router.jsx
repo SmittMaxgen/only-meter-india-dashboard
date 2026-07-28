@@ -34,6 +34,8 @@ import Banner from "../Pages/Banner.jsx";
 import Offer from "../Pages/Offer.jsx";
 import SalesAgents from "../Pages/SalesAgents.jsx";
 import Agents from "../Pages/Agents.jsx";
+import DriverAgentManagement from "../Pages/DriverAgentManagement.jsx";
+import CustomerAgentManagement from "../Pages/CustomerAgentManagement.jsx";
 
 // Redirects non-super_admin roles away from the analytics Dashboard
 // straight to the one section they're allowed to see.
@@ -102,6 +104,8 @@ export const router = createBrowserRouter([
           { path: "vehicle-fare", element: <VehicleFare /> },
           { path: "sales-agents", element: <SalesAgents /> },
           { path: "agents", element: <Agents /> },
+          { path: "driver-agent-management", element: <DriverAgentManagement /> },
+          { path: "customer-agent-management", element: <CustomerAgentManagement /> },
           { path: "*", element: <WorkInProgress /> },
         ],
       },
