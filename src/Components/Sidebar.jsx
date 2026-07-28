@@ -182,28 +182,6 @@ export default function Sidebar({ isOpen, onClose }) {
         ],
       },
       {
-        title: "ADMIN CUSTOMER AND DRIVER MANAGEMENT",
-        groups: [
-          {
-            key: "admin-customer-driver-management",
-            label: "Driver Customer Manager Management",
-            icon: UserIcon,
-            children: [
-              {
-                label: "Customer Management",
-                to: "/dashboard/customer-agent-management",
-                icon: UserIcon,
-              },
-              {
-                label: "Driver Management",
-                to: "/dashboard/driver-agent-management",
-                icon: UserIcon,
-              },
-            ],
-          },
-        ],
-      },
-      {
         title: "ONBOARDING MANAGEMENT",
         items: [
           {
@@ -293,6 +271,28 @@ export default function Sidebar({ isOpen, onClose }) {
             label: "Customer Support Agents",
             to: "/dashboard/agents",
             icon: TicketIcon,
+          },
+        ],
+      },
+            {
+        title: "ADMIN CUSTOMER AND DRIVER MANAGEMENT",
+        groups: [
+          {
+            key: "admin-customer-driver-management",
+            label: "Driver Customer Manager Management",
+            icon: UserIcon,
+            children: [
+              {
+                label: "Customer Management",
+                to: "/dashboard/customer-agent-management",
+                icon: UserIcon,
+              },
+              {
+                label: "Driver Management",
+                to: "/dashboard/driver-agent-management",
+                icon: UserIcon,
+              },
+            ],
           },
         ],
       },
