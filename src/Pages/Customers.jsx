@@ -138,6 +138,21 @@ export default function Customers() {
     XLSX.writeFile(workbook, `Customers_${today}.xlsx`);
   };
 
+  // When ride history is open → hide customer list, show only rides
+  if (rideHistoryOpen && rideHistoryTarget) {
+    return (
+      <RideHistoryModal
+        onClose={() => {
+          setRideHistoryOpen(false);
+          setRideHistoryTarget(null);
+        }}
+        entityId={rideHistoryTarget.id}
+        entityType="user"
+        entityLabel={rideHistoryTarget.full_name || ""}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -327,13 +342,13 @@ export default function Customers() {
         </div>
       </div>
 
-      <RideHistoryModal
+      {/* <RideHistoryModal
         isOpen={rideHistoryOpen}
         onClose={() => setRideHistoryOpen(false)}
         entityId={rideHistoryTarget?.id}
         entityType="user"
         entityLabel={rideHistoryTarget?.full_name || ""}
-      />
+      /> */}
     </div>
   );
 }

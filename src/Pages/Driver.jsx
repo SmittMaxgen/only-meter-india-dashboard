@@ -152,6 +152,21 @@ export default function Drivers() {
     XLSX.writeFile(workbook, `Drivers_${today}.xlsx`);
   };
 
+  // When ride history is open → hide driver list, show only rides
+  if (rideHistoryOpen && rideHistoryTarget) {
+    return (
+      <RideHistoryModal
+        onClose={() => {
+          setRideHistoryOpen(false);
+          setRideHistoryTarget(null);
+        }}
+        entityId={rideHistoryTarget.id}
+        entityType="driver"
+        entityLabel={`${rideHistoryTarget.first_name || ""} ${rideHistoryTarget.last_name || ""}`}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -393,7 +408,7 @@ export default function Drivers() {
         )}
       </div>
 
-      <RideHistoryModal
+      {/* <RideHistoryModal
         isOpen={rideHistoryOpen}
         onClose={() => setRideHistoryOpen(false)}
         entityId={rideHistoryTarget?.id}
@@ -403,7 +418,7 @@ export default function Drivers() {
             ? `${rideHistoryTarget.first_name || ""} ${rideHistoryTarget.last_name || ""}`
             : ""
         }
-      />
+      /> */}
     </div>
   );
 }
