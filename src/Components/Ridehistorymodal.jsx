@@ -33,8 +33,8 @@ export default function RideHistoryModal({
       setLoading(true);
       try {
         const res = await fetch(
-          // `${baseUrl}/${entityType}_ride_history/${entityId}/`,
-          `${baseUrl}/${entityType}_ride_history/${180}/`, // hardcoded test id – remove when done testing
+          `${baseUrl}/${entityType}_ride_history/${entityId}/`,
+          // `${baseUrl}/${entityType}_ride_history/${180}/`, // hardcoded test id – remove when done testing
           { headers: { ...getAuthHeaders() } },
         );
         const json = await res.json();
