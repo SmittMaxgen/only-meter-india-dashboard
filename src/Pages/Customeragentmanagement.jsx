@@ -1,4 +1,4 @@
-import AgentManagementBase from "./AgentManagementBase.jsx";
+import AgentManagementBase from "./AgentManagementBaseW.jsx";
 
 export default function CustomerAgentManagement() {
   return (
