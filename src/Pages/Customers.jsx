@@ -255,13 +255,13 @@ export default function Customers() {
                   <td className="px-4 py-3 text-gray-700">{r.mobile_no}</td>
                   <td className="px-4 py-3 text-gray-700">{r.email}</td>
                   <td className="px-4 py-3 text-gray-700">
-                    {r.address_data?.city ? r.address_data.city : "-"}
+                    {r?.city ? r.city : "-"}
                   </td>
                   <td className="px-4 py-3 text-gray-700">
-                    {r.address_data?.state ? r.address_data.state : "-"}
+                    {r?.state ? r.state : "-"}
                   </td>
                   <td className="px-4 py-3 text-gray-700">
-                    {r.address_data?.country ? r.address_data.country : "-"}
+                    {r?.country ? r.country : "-"}
                   </td>
                   <td className="px-4 py-3">
                     {canManage ? (
