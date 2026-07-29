@@ -70,7 +70,7 @@ export default function RideHistoryModal({
       setLoading(true);
       try {
         const res = await fetch(
-          `${baseUrl}/${entityType}_ride_history/${180}/?page=${page}`,
+          `${baseUrl}/${entityType}_ride_history/${entityId}/?page=${page}`,
           { headers: { ...getAuthHeaders() } },
         );
         const json = await res.json();
