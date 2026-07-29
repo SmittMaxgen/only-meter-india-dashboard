@@ -924,8 +924,8 @@ export default function DriverDetail() {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            brand: vehicleForm.brand_id,
-            model: vehicleForm.model_id,
+            brand: Number(vehicleForm.brand_id),
+            model: Number(vehicleForm.model_id),
             type: vehicleForm.type_id,
             seats: vehicleForm.seats,
             vehicleMode: vehicleForm.vehicleMode,
