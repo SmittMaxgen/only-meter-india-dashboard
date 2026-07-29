@@ -40,6 +40,9 @@ export default function RideHistoryModal({
 
   // Entity (driver/customer) details — no API call, uses data already in the row
   const [selectedEntity, setSelectedEntity] = useState(null);
+// Ride ID search
+  const [searchRideId, setSearchRideId] = useState("");
+  const [searchError, setSearchError] = useState("");
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -100,6 +103,31 @@ export default function RideHistoryModal({
     const entityData =
       entityType === "driver" ? ride.driver_data : ride.user_data;
     setSelectedEntity(entityData || null);
+  };
+
+  // Search by Ride ID — calls the same ride-detail endpoint directly
+  const handleSearchRide = async () => {
+    if (!searchRideId.trim()) return;
+    setSearchError("");
+    setSelectedEntity(null);
+    setDetailLoading(true);
+    try {
+      const res = await fetch(
+        `${baseUrl}/${entityType}_ride_history/ride/${searchRideId.trim()}/`,
+        { headers: { ...getAuthHeaders() } },
+      );
+      const json = await res.json();
+      if (json.data) {
+        setSelectedRide(json.data);
+      } else {
+        setSearchError(`No ride found with ID ${searchRideId.trim()}`);
+      }
+    } catch (err) {
+      console.error("Failed to fetch ride by ID:", err);
+      setSearchError("Something went wrong while searching.");
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   // Ride details icon — API call
@@ -175,6 +203,29 @@ export default function RideHistoryModal({
               <div className="py-10 text-center text-gray-500">
                 No ride history found.
               </div>
+            )}
+
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="text"
+                value={searchRideId}
+                onChange={(e) => {
+                  setSearchRideId(e.target.value);
+                  setSearchError("");
+                }}
+                onKeyDown={(e) => e.key === "Enter" && handleSearchRide()}
+                placeholder="Search by Ride ID..."
+                className="w-full sm:w-64 px-3 py-2 text-sm rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              />
+              <button
+                onClick={handleSearchRide}
+                className="px-4 py-2 text-sm font-medium rounded-md bg-orange-500 text-white hover:bg-orange-600"
+              >
+                Search
+              </button>
+            </div>
+            {searchError && (
+              <div className="text-sm text-red-600 mb-3">{searchError}</div>
             )}
 
             {!loading && rides.length > 0 && (
