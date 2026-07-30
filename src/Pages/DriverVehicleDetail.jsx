@@ -218,7 +218,7 @@ export default function DriverDetail() {
             <div className="flex">
               <span className="font-medium w-36">Name</span>
               <span className="mr-2">:</span>
-              <span>{driverVehicleData.driver_data.name}</span>
+              <span>{driverVehicleData.driver_data.first_name} {driverVehicleData.driver_data.last_name}</span>
             </div>
             <div className="flex">
               <span className="font-medium w-36">Email</span>
