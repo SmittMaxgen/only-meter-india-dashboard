@@ -29,6 +29,7 @@ export default function RideHistoryModal({
   entityId,
   entityType,
   entityLabel,
+  initialRideId,
 }) {
   const { baseUrl } = useAppContext();
   const [rides, setRides] = useState([]);
@@ -63,8 +64,8 @@ export default function RideHistoryModal({
     setSelectedEntity(null);
   }, [entityId, entityType]);
 
-  useEffect(() => {
-    if (!entityId) return;
+ useEffect(() => {
+    if (!entityId || initialRideId) return;
 
     const fetchRides = async () => {
       setLoading(true);
@@ -96,6 +97,13 @@ export default function RideHistoryModal({
 
     fetchRides();
   }, [entityId, entityType, baseUrl, page]);
+
+  // Auto-load a specific ride when opened directly via Ride ID search
+  useEffect(() => {
+    if (!initialRideId) return;
+    handleViewRideDetails(initialRideId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialRideId]);
 
   // Eye icon — no API call, just use the entity object already present on the row
   const handleViewEntity = (ride) => {
@@ -149,8 +157,8 @@ export default function RideHistoryModal({
   };
 
   const goBack = () => {
-    if (selectedRide) return setSelectedRide(null);
     if (selectedEntity) return setSelectedEntity(null);
+    if (selectedRide && !initialRideId) return setSelectedRide(null);
     onClose();
   };
 
@@ -158,7 +166,9 @@ export default function RideHistoryModal({
     ? `Ride #${selectedRide.id}`
     : selectedEntity
       ? `${entityType === "driver" ? "Driver" : "Customer"} Details — ${entityLabel || ""}`
-      : `Ride History — ${entityLabel || ""}`;
+      : initialRideId
+        ? `Ride #${initialRideId}`
+        : `Ride History — ${entityLabel || ""}`;
 
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
@@ -190,7 +200,14 @@ export default function RideHistoryModal({
 
       {/* Content */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
-        {!selectedRide && !selectedEntity && (
+        {initialRideId && !selectedRide && !selectedEntity && (
+          <div className="py-10 text-center text-gray-500">
+            <div className="inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="mt-3">Loading ride details...</div>
+          </div>
+        )}
+
+        {!selectedRide && !selectedEntity && !initialRideId && (
           <>
             {loading && (
               <div className="py-10 text-center text-gray-500">

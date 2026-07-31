@@ -7,7 +7,7 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import RideHistoryModal from "../Components/RideHistoryModal.jsx";
 
@@ -24,11 +24,43 @@ export default function Drivers() {
   const role = localStorage.getItem("role");
   const canManage = !role || role === "super_admin" || role === "driver_manager";
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rideHistoryOpen, setRideHistoryOpen] = useState(false);
   const [rideHistoryTarget, setRideHistoryTarget] = useState(null);
+  const [rideIdToOpen, setRideIdToOpen] = useState(null);
+  const [rideIdFilter, setRideIdFilter] = useState("");
+
+  // Auto-open ride modal when navigated here via ?rideId= (e.g. from Topbar)
+  useEffect(() => {
+    const paramRideId = searchParams.get("rideId");
+    if (paramRideId) {
+      setRideIdToOpen(paramRideId);
+      setRideHistoryTarget(null);
+      setRideHistoryOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Auto-open ride modal when navigated here via ?rideId= (e.g. from Topbar)
+  useEffect(() => {
+    const paramRideId = searchParams.get("rideId");
+    if (paramRideId) {
+      setRideIdToOpen(paramRideId);
+      setRideHistoryTarget(null);
+      setRideHistoryOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const openRideHistory = (driver) => {
     setRideHistoryTarget(driver);
+    setRideHistoryOpen(true);
+  };
+
+  const openRideById = () => {
+    if (!rideIdFilter.trim()) return;
+    setRideIdToOpen(rideIdFilter.trim());
+    setRideHistoryTarget(null);
     setRideHistoryOpen(true);
   };
 
@@ -36,6 +68,7 @@ export default function Drivers() {
   const [cityFilter, setCityFilter] = useState("");
   const [stateFilter, setStateFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
+  const [phoneFilter, setPhoneFilter] = useState("");
   const [filterLoading, setFilterLoading] = useState(false);
 
   useEffect(() => {
@@ -43,8 +76,8 @@ export default function Drivers() {
   }, []);
 
   // Debounced auto-filter by city/state/country
-  useEffect(() => {
-    if (!cityFilter && !stateFilter && !countryFilter) {
+useEffect(() => {
+    if (!cityFilter && !stateFilter && !countryFilter && !phoneFilter) {
       setDrivers(fetchedData?.drivers || []);
       return;
     }
@@ -54,6 +87,7 @@ export default function Drivers() {
       if (cityFilter) params.append("city", cityFilter);
       if (stateFilter) params.append("state", stateFilter);
       if (countryFilter) params.append("country", countryFilter);
+      if (phoneFilter) params.append("phone", phoneFilter);
       const qs = params.toString();
 
       setFilterLoading(true);
@@ -70,12 +104,13 @@ export default function Drivers() {
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cityFilter, stateFilter, countryFilter]);
+  }, [cityFilter, stateFilter, countryFilter, phoneFilter]);
 
   const clearLocationFilters = () => {
     setCityFilter("");
     setStateFilter("");
     setCountryFilter("");
+    setPhoneFilter("");
   };
 
   useEffect(() => {
@@ -153,16 +188,23 @@ export default function Drivers() {
   };
 
   // When ride history is open → hide driver list, show only rides
-  if (rideHistoryOpen && rideHistoryTarget) {
+  if (rideHistoryOpen && (rideHistoryTarget || rideIdToOpen)) {
     return (
       <RideHistoryModal
         onClose={() => {
           setRideHistoryOpen(false);
           setRideHistoryTarget(null);
+          setRideIdToOpen(null);
+          if (searchParams.get("rideId")) setSearchParams({});
         }}
-        entityId={rideHistoryTarget.id}
+        entityId={rideHistoryTarget?.id}
         entityType="driver"
-        entityLabel={`${rideHistoryTarget.first_name || ""} ${rideHistoryTarget.last_name || ""}`}
+        entityLabel={
+          rideHistoryTarget
+            ? `${rideHistoryTarget.first_name || ""} ${rideHistoryTarget.last_name || ""}`
+            : ""
+        }
+        initialRideId={rideIdToOpen}
       />
     );
   }
@@ -233,6 +275,28 @@ export default function Drivers() {
             onChange={(e) => setCountryFilter(e.target.value)}
             className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
+          <input
+            type="text"
+            placeholder="Filter by phone"
+            value={phoneFilter}
+            onChange={(e) => setPhoneFilter(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <input
+            type="text"
+            placeholder="Search Ride ID"
+            value={rideIdFilter}
+            onChange={(e) => setRideIdFilter(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && openRideById()}
+            className="w-full md:w-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <button
+            onClick={openRideById}
+            disabled={!rideIdFilter.trim()}
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+          >
+            Find Ride
+          </button>
           {filterLoading && (
             <span className="text-sm text-gray-500 whitespace-nowrap">
               Filtering...
@@ -246,7 +310,7 @@ export default function Drivers() {
             Clear
           </button>
         </div>
-      </div>
+      </div>Search Ride ID
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

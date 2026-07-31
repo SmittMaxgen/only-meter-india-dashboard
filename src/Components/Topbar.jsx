@@ -1,12 +1,23 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Logo from "../assets/Logo_1.jpg";
 
 export default function Topbar({ onMenuClick }) {
   const navigate = useNavigate();
+  const [rideId, setRideId] = useState("");
+  const [rideType, setRideType] = useState("driver");
 
   function handleLogout() {
     localStorage.removeItem("isAuth");
     navigate("/");
+  }
+
+  function handleRideSearch() {
+    if (!rideId.trim()) return;
+    const target = rideType === "driver" ? "drivers" : "customers";
+    navigate(`/dashboard/${target}?rideId=${rideId.trim()}`);
+    setRideId("");
   }
 
   return (
@@ -37,6 +48,36 @@ export default function Topbar({ onMenuClick }) {
 
         <img src={Logo} alt="Logo" className="h-28 w-35 mt-3" />
         {/* <span className="font-semibold text-2xl text-orange-500">Only Meter</span> */}
+      </div>
+
+      {/* Global Ride ID search */}
+      <div className="hidden md:flex items-center gap-2">
+        <select
+          value={rideType}
+          onChange={(e) => setRideType(e.target.value)}
+          className="px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          <option value="driver">Driver Ride</option>
+          <option value="user">Customer Ride</option>
+        </select>
+        <div className="relative">
+          <input
+            type="text"
+            value={rideId}
+            onChange={(e) => setRideId(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleRideSearch()}
+            placeholder="Search Ride ID"
+            className="w-44 pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        </div>
+        <button
+          onClick={handleRideSearch}
+          disabled={!rideId.trim()}
+          className="px-3 py-2 text-sm font-medium rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Go
+        </button>
       </div>
 
       <div className="flex items-center gap-3">
