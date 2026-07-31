@@ -43,6 +43,7 @@ import DriverCustomerAgentManagement from "../Pages/DriverCustomerAgentManagemen
 const ROLE_HOME = {
   driver_manager: "/dashboard/driver",
   customer_manager: "/dashboard/customers",
+  drv_pls_cust: "/dashboard/customers",
 };
 
 function RoleHome() {
