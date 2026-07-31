@@ -32,10 +32,21 @@ const ROLE_IDS = {
  * @param {string} title - Heading shown on the page
  * @param {string} breadcrumbLabel - Text shown in the breadcrumb
  */
-export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
+export default function AgentManagementBase({
+  role,
+  roles,
+  title,
+  breadcrumbLabel,
+}) {
   const { baseUrl, postData, patchData, deleteData } = useAppContext();
 
+  // Support either a single `role` (backward compatible) or a `roles` array
+  // for pages that manage agents across multiple roles (e.g. drv_pls_cust).
+  const roleList = roles && roles.length ? roles : [role];
+  const isMultiRole = roleList.length > 1;
+
   const [agents, setAgents] = useState([]);
+  const [roleIdMap, setRoleIdMap] = useState({});
   const [roleId, setRoleId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [emailQuery, setEmailQuery] = useState("");
@@ -52,6 +63,7 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
     password: "",
     state: "",
     cities: [],
+    roleSelect: "",
   });
 
   // India states/cities from the country-state-city package
@@ -76,8 +88,19 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
         headers: { ...getAuthHeaders() },
       });
       const data = await res.json();
-      const matched = (data.data || []).find((r) => r.role_name === role);
-      setRoleId(matched ? matched.id : null);
+      const all = data.data || [];
+
+      const map = {};
+      roleList.forEach((r) => {
+        const matched = all.find((x) => x.role_name === r);
+        map[r] = matched ? matched.id : null;
+      });
+      setRoleIdMap(map);
+
+      // Keep single roleId for backward-compat (single-role pages)
+      if (!isMultiRole) {
+        setRoleId(map[roleList[0]] ?? null);
+      }
     } catch (error) {
       console.error("Failed to fetch role id:", error);
     }
@@ -86,11 +109,20 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
   const fetchAgents = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${baseUrl}/admin_data/?role=${role}`, {
-        headers: { ...getAuthHeaders() },
-      });
-      const data = await res.json();
-      setAgents(data.data || []);
+      const results = await Promise.all(
+        roleList.map((r) =>
+          fetch(`${baseUrl}/admin_data/?role=${r}`, {
+            headers: { ...getAuthHeaders() },
+          }).then((res) => res.json()),
+        ),
+      );
+
+      const merged = results.flatMap((data) => data.data || []);
+      const deduped = Array.from(
+        new Map(merged.map((a) => [a.id, a])).values(),
+      );
+
+      setAgents(deduped);
       setPage(1);
     } catch (error) {
       console.error("Fetch Error:", error);
@@ -121,7 +153,13 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
   const current = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const resetForm = () => {
-    setFormData({ email: "", password: "", state: "", cities: [] });
+    setFormData({
+      email: "",
+      password: "",
+      state: "",
+      cities: [],
+      roleSelect: isMultiRole ? "" : roleList[0],
+    });
     setEditingAgent(null);
     setShowPassword(false);
   };
@@ -133,11 +171,14 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
 
   const handleEdit = (agent) => {
     setEditingAgent(agent);
+    const agentRoleName =
+      typeof agent.role === "object" ? agent.role?.role_name : agent.role;
     setFormData({
       email: agent.email || "",
       password: "",
       state: agent.state || "",
       cities: Array.isArray(agent.cities) ? agent.cities : [],
+      roleSelect: agentRoleName || (isMultiRole ? "" : roleList[0]),
     });
     setIsModalOpen(true);
   };
@@ -162,10 +203,17 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.state || formData.cities.length === 0) {
+    if (
+      !formData.email ||
+      !formData.state ||
+      formData.cities.length === 0 ||
+      (isMultiRole && !formData.roleSelect)
+    ) {
       Swal.fire(
         "Error",
-        "Email, State and at least one City are required!",
+        `Email, State, at least one City${
+          isMultiRole ? ", and Role" : ""
+        } are required!`,
         "error",
       );
       return;
@@ -174,7 +222,12 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
       Swal.fire("Error", "Password is required for a new agent!", "error");
       return;
     }
-    if (!roleId) {
+
+    const selectedRoleId = isMultiRole
+      ? roleIdMap[formData.roleSelect]
+      : roleId;
+
+    if (!selectedRoleId) {
       Swal.fire("Error", "Role id could not be loaded. Please retry.", "error");
       return;
     }
@@ -184,9 +237,7 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
     if (formData.password) {
       payload.append("password", formData.password);
     }
-    // Sending the role slug here, see ROLE_IDS note above if your API needs
-    // the numeric id instead, e.g.: payload.append("role", ROLE_IDS[role]);
-    payload.append("role", roleId);
+    payload.append("role", selectedRoleId);
     payload.append("state", formData.state);
     // cities sent as a single JSON array string, e.g. '["Ahmedabad","Agol","Adalaj"]'
     payload.append("cities", JSON.stringify(formData.cities));
@@ -327,6 +378,9 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
             <thead className="bg-gray-50">
               <tr className="text-left text-gray-700">
                 <th className="px-4 py-3 font-medium">Email</th>
+                {isMultiRole && (
+                  <th className="px-4 py-3 font-medium">Role</th>
+                )}
                 <th className="px-4 py-3 font-medium">State</th>
                 <th className="px-4 py-3 font-medium">Cities</th>
                 <th className="px-4 py-3 font-medium">Active</th>
@@ -352,6 +406,13 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
                     className="border-t border-gray-100 hover:bg-gray-50"
                   >
                     <td className="px-4 py-3 font-medium">{agent.email}</td>
+                    {isMultiRole && (
+                      <td className="px-4 py-3 capitalize">
+                        {typeof agent.role === "object"
+                          ? agent.role?.role_name?.replace(/_/g, " ")
+                          : agent.role?.replace(/_/g, " ") || "-"}
+                      </td>
+                    )}
                     <td className="px-4 py-3">{agent.state}</td>
                     <td className="px-4 py-3">
                       {Array.isArray(agent.cities)
@@ -492,6 +553,29 @@ export default function AgentManagementBase({ role, title, breadcrumbLabel }) {
                   </button>
                 </div>
               </div>
+
+              {isMultiRole && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={formData.roleSelect}
+                    onChange={(e) =>
+                      setFormData({ ...formData, roleSelect: e.target.value })
+                    }
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">Select Role</option>
+                    {roleList.map((r) => (
+                      <option key={r} value={r}>
+                        {r === "driver_manager" ? "Driver Manager" : "Customer Manager"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -292,6 +292,11 @@ export default function Sidebar({ isOpen, onClose }) {
                 to: "/dashboard/driver-agent-management",
                 icon: UserIcon,
               },
+              {
+                label: "Driver Plus Customer Management",
+                to: "/dashboard/driver-pls-customer-management",
+                icon: UserIcon,
+              },
             ],
           },
         ],
