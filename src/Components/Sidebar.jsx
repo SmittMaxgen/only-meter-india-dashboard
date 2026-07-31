@@ -311,6 +311,13 @@ export default function Sidebar({ isOpen, onClose }) {
     if (role === "customer_manager") {
       return sections.filter((sec) => sec.title === "CUSTOMER MANAGEMENT");
     }
+    if (role === "drv_pls_cust") {
+      return sections.filter(
+        (sec) =>
+          sec.title === "DRIVER MANAGEMENT" ||
+          sec.title === "CUSTOMER MANAGEMENT",
+      );
+    }
     return sections;
   }, [sections, role]);
 

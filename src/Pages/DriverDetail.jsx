@@ -1099,20 +1099,19 @@ export default function DriverDetail() {
             }
           />
           <Detail label="Status" value={driver.status} />
-          <Detail label="Vehicle Type" value={driver.vehicle_type} />
-          <Detail label="Referral Code" value={driver.referral_code} />
-          <Detail label="Bonus Amount" value={driver.bonus_amount} />
-          <Detail label="Membership" value={driver.membership ? "Yes" : "No"} />
+          {/* <Detail label="Vehicle Type" value={driver.vehicle_type} /> */}
+          {/* <Detail label="Referral Code" value={driver.referral_code} /> */}
+          {/* <Detail label="Bonus Amount" value={driver.bonus_amount} /> */}
+          {/* <Detail label="Membership" value={driver.membership ? "Yes" : "No"} /> */}
           <Detail label="GST Number" value={driver.gst_number} />
           {/* <Detail label="Device Token" value={driver.device_token} /> */}
           {/* <Detail label="Password Hash" value={driver.password} /> */}
-          <Detail label="Lat" value={driver.lat} />
-          <Detail label="Lng" value={driver.lng} />
+          {/* <Detail label="Lat" value={driver.lat} />
+          <Detail label="Lng" value={driver.lng} /> */}
           <Detail
             label="Created At"
             value={driver.created_at ? formatDate(driver.created_at) : "-"}
           />
-
           <div className="mt-3">
             <span className="font-medium w-40 inline-block">Verification</span>
             <span className="mr-2">:</span>
@@ -1122,11 +1121,18 @@ export default function DriverDetail() {
               onChange={(e) => handleVerificationChange(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-1 text-sm"
             >
-              <option value="pending">Pending</option>
+              {/* <option value="pending">Pending</option> */}
               <option value="approved">Approved</option>
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
+          {
+            driver.verification === "cancelled" &&
+                    <Detail
+            label="Cancellation Reason"
+            value={driver.cancel_reason || "-"}
+          />
+          }
 
           {driver.verification === "cancelled" &&
             driver.cancellation_reason && (

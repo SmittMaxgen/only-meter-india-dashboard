@@ -10,6 +10,7 @@ import { useAppContext } from "../Central_Store/app_context.jsx";
 import { Link, useSearchParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import RideHistoryModal from "../Components/RideHistoryModal.jsx";
+import Swal from "sweetalert2";
 
 
 export default function Drivers() {
@@ -22,13 +23,18 @@ export default function Drivers() {
   const pageSize = 10;
 
   const role = localStorage.getItem("role");
-  const canManage = !role || role === "super_admin" || role === "driver_manager";
+const canManage =
+    !role ||
+    role === "super_admin" ||
+    role === "driver_manager" ||
+    role === "drv_pls_cust";
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [rideHistoryOpen, setRideHistoryOpen] = useState(false);
   const [rideHistoryTarget, setRideHistoryTarget] = useState(null);
   const [rideIdToOpen, setRideIdToOpen] = useState(null);
   const [rideIdFilter, setRideIdFilter] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
 
   // Auto-open ride modal when navigated here via ?rideId= (e.g. from Topbar)
   useEffect(() => {
@@ -40,18 +46,6 @@ export default function Drivers() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
-
-  // Auto-open ride modal when navigated here via ?rideId= (e.g. from Topbar)
-  useEffect(() => {
-    const paramRideId = searchParams.get("rideId");
-    if (paramRideId) {
-      setRideIdToOpen(paramRideId);
-      setRideHistoryTarget(null);
-      setRideHistoryOpen(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
-
   const openRideHistory = (driver) => {
     setRideHistoryTarget(driver);
     setRideHistoryOpen(true);
@@ -139,6 +133,66 @@ useEffect(() => {
       await refetchResource("drivers", "/driver/");
     } catch (err) {
       console.error("Delete failed:", err);
+    }
+  };
+
+  const handleVerificationChange = async (id, status) => {
+    let cancel_reason;
+
+    if (status === "cancelled") {
+      const { value: reason, isConfirmed } = await Swal.fire({
+        title: "Reason for Cancellation",
+        input: "textarea",
+        inputLabel: "Please provide a reason",
+        inputPlaceholder: "Type the reason here...",
+        showCancelButton: true,
+        confirmButtonText: "Submit",
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#6b7280",
+        inputValidator: (value) => {
+          if (!value || !value.trim()) {
+            return "A cancellation reason is required.";
+          }
+        },
+      });
+
+      if (!isConfirmed) return;
+      cancel_reason = reason.trim();
+    }
+
+    try {
+      setUpdatingId(id);
+      const token = localStorage.getItem("accessToken");
+      const payload = { verification: status };
+      if (status === "cancelled") {
+        payload.cancel_reason = cancel_reason;
+      }
+
+      const res = await fetch(`${baseUrl}/driver/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to update verification status");
+      setDrivers((prev) =>
+        prev.map((d) =>
+          d.id === id
+            ? {
+                ...d,
+                verification: status,
+                cancel_reason:
+                  status === "cancelled" ? cancel_reason : d.cancel_reason,
+              }
+            : d,
+        ),
+      );
+    } catch (err) {
+      console.error("Verification update failed:", err);
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -332,6 +386,7 @@ useEffect(() => {
                   <th className="px-4 py-3 font-medium">State</th>
                   <th className="px-4 py-3 font-medium">Country</th>
                   <th className="px-4 py-3 font-medium">Bonus Amount</th>
+                  <th className="px-4 py-3 font-medium">Verification</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
@@ -373,6 +428,20 @@ useEffect(() => {
                     </td>
                     <td className="px-4 py-3 text-green-700 font-medium">
                       {r.bonus_amount || "-"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={r.verification || ""}
+                        disabled={updatingId === r.id}
+                        onChange={(e) =>
+                          handleVerificationChange(r.id, e.target.value)
+                        }
+                        className="border border-gray-300 rounded-lg px-2 py-1 text-xs disabled:opacity-50"
+                      >
+                        {/* <option value="pending">Pending</option> */}
+                        <option value="approved">Approved</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                     </td>
                     <td
                       className={`px-4 py-3 font-medium ${

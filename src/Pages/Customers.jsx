@@ -19,7 +19,11 @@ export default function Customers() {
   const pageSize = 10;
 
   const role = localStorage.getItem("role");
-  const canManage = !role || role === "super_admin" || role === "customer_manager";
+const canManage =
+    !role ||
+    role === "super_admin" ||
+    role === "customer_manager" ||
+    role === "drv_pls_cust";
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [rideHistoryOpen, setRideHistoryOpen] = useState(false);
