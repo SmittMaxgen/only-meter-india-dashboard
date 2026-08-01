@@ -869,19 +869,31 @@ export default function DriverDetail() {
           prev.cancellation_reason,
       }));
 
+      const toastConfig = {
+        pending: { icon: "info", title: "Marked as Pending" },
+        approved: { icon: "success", title: "Driver Approved" },
+        cancelled: { icon: "error", title: "Driver Cancelled" },
+      }[status] || { icon: "info", title: "Status Updated" };
+
       Swal.fire({
-        title: "Success!",
-        text: `Driver verification updated to "${status}".`,
-        icon: "success",
-        confirmButtonColor: "#2563eb",
+        toast: true,
+        position: "top-end",
+        icon: toastConfig.icon,
+        title: toastConfig.title,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
       });
     } catch (error) {
       console.error(error);
       Swal.fire({
-        title: "Error!",
-        text: "Something went wrong while updating verification.",
+        toast: true,
+        position: "top-end",
         icon: "error",
-        confirmButtonColor: "#dc2626",
+        title: "Failed to update verification",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
       });
     } finally {
       setUpdating(false);
@@ -1121,7 +1133,9 @@ export default function DriverDetail() {
               onChange={(e) => handleVerificationChange(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-1 text-sm"
             >
-              {/* <option value="pending">Pending</option> */}
+              {driver.verification !== "approved" && (
+                <option value="pending">Pending</option>
+              )}
               <option value="approved">Approved</option>
               <option value="cancelled">Cancelled</option>
             </select>

@@ -189,8 +189,33 @@ useEffect(() => {
             : d,
         ),
       );
+
+      const toastConfig = {
+        pending: { icon: "info", title: "Marked as Pending" },
+        approved: { icon: "success", title: "Driver Approved" },
+        cancelled: { icon: "error", title: "Driver Cancelled" },
+      }[status] || { icon: "info", title: "Status Updated" };
+
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: toastConfig.icon,
+        title: toastConfig.title,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+      });
     } catch (err) {
       console.error("Verification update failed:", err);
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "error",
+        title: "Failed to update status",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+      });
     } finally {
       setUpdatingId(null);
     }
@@ -430,7 +455,7 @@ useEffect(() => {
                       {r.bonus_amount || "-"}
                     </td>
                     <td className="px-4 py-3">
-                      <select
+                     <select
                         value={r.verification || ""}
                         disabled={updatingId === r.id}
                         onChange={(e) =>
@@ -438,7 +463,9 @@ useEffect(() => {
                         }
                         className="border border-gray-300 rounded-lg px-2 py-1 text-xs disabled:opacity-50"
                       >
-                        {/* <option value="pending">Pending</option> */}
+                        {r.verification !== "approved" && (
+                          <option value="pending">Pending</option>
+                        )}
                         <option value="approved">Approved</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
