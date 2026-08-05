@@ -37,6 +37,7 @@ import Agents from "../Pages/Agents.jsx";
 import DriverAgentManagement from "../Pages/DriverAgentManagement.jsx";
 import CustomerAgentManagement from "../Pages/CustomerAgentManagement.jsx";
 import DriverCustomerAgentManagement from "../Pages/DriverCustomerAgentManagement.jsx";
+import DriverTransactionHistoryPage from "../Pages/DriverTransactionHistoryPage.jsx";
 
 // Redirects non-super_admin roles away from the analytics Dashboard
 // straight to the one section they're allowed to see.
@@ -109,6 +110,7 @@ export const router = createBrowserRouter([
           { path: "driver-agent-management", element: <DriverAgentManagement /> },
           { path: "customer-agent-management", element: <CustomerAgentManagement /> },
           { path: "driver-pls-customer-management", element: <DriverCustomerAgentManagement /> },
+          { path: "driver/transaction-history/:id", element: <DriverTransactionHistoryPage /> },
           { path: "*", element: <WorkInProgress /> },
         ],
       },

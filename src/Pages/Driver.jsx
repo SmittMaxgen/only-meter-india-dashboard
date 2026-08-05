@@ -5,9 +5,11 @@ import {
   TrashIcon,
   ArrowDownTrayIcon,
   ClockIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
-import { Link, useSearchParams } from "react-router-dom";
+// import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import RideHistoryModal from "../Components/RideHistoryModal.jsx";
 import Swal from "sweetalert2";
@@ -29,13 +31,14 @@ const canManage =
     role === "driver_manager" ||
     role === "drv_pls_cust";
 
+    const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [rideHistoryOpen, setRideHistoryOpen] = useState(false);
   const [rideHistoryTarget, setRideHistoryTarget] = useState(null);
   const [rideIdToOpen, setRideIdToOpen] = useState(null);
   const [rideIdFilter, setRideIdFilter] = useState("");
-  const [updatingId, setUpdatingId] = useState(null);
-
+const [updatingId, setUpdatingId] = useState(null);
+  const [updatingActiveId, setUpdatingActiveId] = useState(null);
   // Auto-open ride modal when navigated here via ?rideId= (e.g. from Topbar)
   useEffect(() => {
     const paramRideId = searchParams.get("rideId");
@@ -56,6 +59,14 @@ const canManage =
     setRideIdToOpen(rideIdFilter.trim());
     setRideHistoryTarget(null);
     setRideHistoryOpen(true);
+  };
+
+  const openTransactions = (driver) => {
+    navigate(`/dashboard/driver/transaction-history/${driver.id}`, {
+      state: {
+        driverLabel: `${driver.first_name || ""} ${driver.last_name || ""}`,
+      },
+    });
   };
 
   // Location filters
@@ -136,8 +147,52 @@ useEffect(() => {
     }
   };
 
+const handleActiveToggle = async (id, nextValue) => {
+    try {
+      setUpdatingActiveId(id);
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch(`${baseUrl}/driver/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ is_active: nextValue }),
+      });
+      if (!res.ok) throw new Error("Failed to update active status");
+      setDrivers((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, is_active: nextValue } : d)),
+      );
+
+      await refetchResource("drivers", "/driver/");
+
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: nextValue ? "success" : "error",
+        title: nextValue ? "Driver Activated" : "Driver Deactivated",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+      });
+    } catch (err) {
+      console.error("Active status update failed:", err);
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "error",
+        title: "Failed to update active status",
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+      });
+    } finally {
+      setUpdatingActiveId(null);
+    }
+  };
+
   const handleVerificationChange = async (id, status) => {
-    let cancel_reason;
+  let cancel_reason;
 
     if (status === "cancelled") {
       const { value: reason, isConfirmed } = await Swal.fire({
@@ -189,6 +244,8 @@ useEffect(() => {
             : d,
         ),
       );
+
+      await refetchResource("drivers", "/driver/");
 
       const toastConfig = {
         pending: { icon: "info", title: "Marked as Pending" },
@@ -287,6 +344,8 @@ useEffect(() => {
       />
     );
   }
+
+  
 
   return (
     <div className="space-y-4">
@@ -411,6 +470,7 @@ useEffect(() => {
                   <th className="px-4 py-3 font-medium">State</th>
                   <th className="px-4 py-3 font-medium">Country</th>
                   <th className="px-4 py-3 font-medium">Bonus Amount</th>
+                  <th className="px-4 py-3 font-medium">Active</th>
                   <th className="px-4 py-3 font-medium">Verification</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Actions</th>
@@ -455,6 +515,20 @@ useEffect(() => {
                       {r.bonus_amount || "-"}
                     </td>
                     <td className="px-4 py-3">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={r.is_active !== false}
+                          disabled={updatingActiveId === r.id}
+                          onChange={(e) =>
+                            handleActiveToggle(r.id, e.target.checked)
+                          }
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                      </label>
+                    </td>
+                    <td className="px-4 py-3">
                      <select
                         value={r.verification || ""}
                         disabled={updatingId === r.id}
@@ -490,6 +564,13 @@ useEffect(() => {
                               <EyeIcon className="h-5 w-5" />
                             </button>
                           </Link>
+                          <button
+                            onClick={() => openTransactions(r)}
+                            className="text-sm py-1 text-green-600 cursor-pointer"
+                            title="Wallet / Transaction History"
+                          >
+                            <BanknotesIcon className="h-5 w-5" />
+                          </button>
                           <button
                             onClick={() => openRideHistory(r)}
                             className="text-sm py-1 text-blue-600 cursor-pointer"
