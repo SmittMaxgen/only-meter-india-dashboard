@@ -294,7 +294,7 @@ export default function RideDetail() {
           <div className="flex">
             <span className="font-medium w-36">Drop Location</span>
             <span className="mr-2">:</span>
-            <span>{ride.dropLocation || "Not available"}</span>
+            <span>{ride.drop_address || "Not available"}</span>
           </div>
         </div>
       </div>
