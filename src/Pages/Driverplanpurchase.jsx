@@ -28,7 +28,9 @@ function Header({ onAdd, filters, onFilterChange, drivers }) {
             <option value="">All Drivers</option>
             {(drivers || []).map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name || d.full_name || `Driver #${d.id}`}
+                {d.first_name
+                  ? `${d.first_name} ${d.last_name || ""}`.trim()
+                  : `Driver #${d.id}`}
               </option>
             ))}
           </select> */}
@@ -44,7 +46,7 @@ function Header({ onAdd, filters, onFilterChange, drivers }) {
             <option value="active">Active</option>
             <option value="expired">Expired</option>
           </select>
-{/* 
+          {/* 
           <button
             onClick={onAdd}
             className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-3 py-2 rounded-md"
@@ -101,7 +103,9 @@ function Modal({ open, onClose, onSave, drivers, plans }) {
               <option value="">Select Driver</option>
               {(drivers || []).map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.name || d.full_name || `Driver #${d.id}`}
+                  {d.first_name
+                    ? `${d.first_name} ${d.last_name || ""}`.trim()
+                    : `Driver #${d.id}`}
                 </option>
               ))}
             </select>
@@ -159,7 +163,10 @@ function StatusBadge({ status }) {
 
 function driverLabel(d) {
   if (!d) return "—";
-  if (typeof d === "object") return d.name || d.full_name || `#${d.id}`;
+  if (typeof d === "object")
+    return d.first_name
+      ? `${d.first_name} ${d.last_name || ""}`.trim()
+      : `#${d.id}`;
   return `#${d}`;
 }
 
