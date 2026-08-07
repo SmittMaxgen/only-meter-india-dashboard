@@ -1,4 +1,3 @@
-import { useMemo, useState, useEffect } from "react";
 import {
   MagnifyingGlassIcon,
   EyeIcon,
@@ -6,6 +5,7 @@ import {
   ArrowDownTrayIcon,
   ClockIcon,
   BanknotesIcon,
+  TruckIcon,
 } from "@heroicons/react/24/outline";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 // import { Link, useSearchParams } from "react-router-dom";
@@ -13,7 +13,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import RideHistoryModal from "../Components/RideHistoryModal.jsx";
 import Swal from "sweetalert2";
-
+import { useEffect, useMemo, useState } from "react";
 
 export default function Drivers() {
   const { fetchedData, deleteData, refetchResource, baseUrl, getData } =
@@ -25,19 +25,19 @@ export default function Drivers() {
   const pageSize = 10;
 
   const role = localStorage.getItem("role");
-const canManage =
+  const canManage =
     !role ||
     role === "super_admin" ||
     role === "driver_manager" ||
     role === "drv_pls_cust";
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [rideHistoryOpen, setRideHistoryOpen] = useState(false);
   const [rideHistoryTarget, setRideHistoryTarget] = useState(null);
   const [rideIdToOpen, setRideIdToOpen] = useState(null);
   const [rideIdFilter, setRideIdFilter] = useState("");
-const [updatingId, setUpdatingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
   const [updatingActiveId, setUpdatingActiveId] = useState(null);
   // Auto-open ride modal when navigated here via ?rideId= (e.g. from Topbar)
   useEffect(() => {
@@ -52,6 +52,14 @@ const [updatingId, setUpdatingId] = useState(null);
   const openRideHistory = (driver) => {
     setRideHistoryTarget(driver);
     setRideHistoryOpen(true);
+  };
+
+  const openVehicles = (driver) => {
+    navigate(`/dashboard/driver/vehicles/${driver.id}`, {
+      state: {
+        driverLabel: `${driver.first_name || ""} ${driver.last_name || ""}`,
+      },
+    });
   };
 
   const openRideById = () => {
@@ -81,7 +89,7 @@ const [updatingId, setUpdatingId] = useState(null);
   }, []);
 
   // Debounced auto-filter by city/state/country
-useEffect(() => {
+  useEffect(() => {
     if (!cityFilter && !stateFilter && !countryFilter && !phoneFilter) {
       setDrivers(fetchedData?.drivers || []);
       return;
@@ -147,7 +155,7 @@ useEffect(() => {
     }
   };
 
-const handleActiveToggle = async (id, nextValue) => {
+  const handleActiveToggle = async (id, nextValue) => {
     try {
       setUpdatingActiveId(id);
       const token = localStorage.getItem("accessToken");
@@ -192,7 +200,7 @@ const handleActiveToggle = async (id, nextValue) => {
   };
 
   const handleVerificationChange = async (id, status) => {
-  let cancel_reason;
+    let cancel_reason;
 
     if (status === "cancelled") {
       const { value: reason, isConfirmed } = await Swal.fire({
@@ -345,8 +353,6 @@ const handleActiveToggle = async (id, nextValue) => {
     );
   }
 
-  
-
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -448,8 +454,8 @@ const handleActiveToggle = async (id, nextValue) => {
             Clear
           </button>
         </div>
-      </div>Search Ride ID
-
+      </div>
+      Search Ride ID
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -470,6 +476,7 @@ const handleActiveToggle = async (id, nextValue) => {
                   <th className="px-4 py-3 font-medium">State</th>
                   <th className="px-4 py-3 font-medium">Country</th>
                   <th className="px-4 py-3 font-medium">Bonus Amount</th>
+                  <th className="px-4 py-3 font-medium">Vehicle</th>
                   <th className="px-4 py-3 font-medium">Active</th>
                   <th className="px-4 py-3 font-medium">Verification</th>
                   <th className="px-4 py-3 font-medium">Status</th>
@@ -515,6 +522,15 @@ const handleActiveToggle = async (id, nextValue) => {
                       {r.bonus_amount || "-"}
                     </td>
                     <td className="px-4 py-3">
+                      <button
+                        onClick={() => openVehicles(r)}
+                        className="text-sm py-1 text-orange-600 hover:text-orange-700 cursor-pointer"
+                        title="View Vehicles"
+                      >
+                        <TruckIcon className="h-5 w-5" />
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
@@ -529,7 +545,7 @@ const handleActiveToggle = async (id, nextValue) => {
                       </label>
                     </td>
                     <td className="px-4 py-3">
-                     <select
+                      <select
                         value={r.verification || ""}
                         disabled={updatingId === r.id}
                         onChange={(e) =>
@@ -648,7 +664,6 @@ const handleActiveToggle = async (id, nextValue) => {
           </div>
         )}
       </div>
-
       {/* <RideHistoryModal
         isOpen={rideHistoryOpen}
         onClose={() => setRideHistoryOpen(false)}
