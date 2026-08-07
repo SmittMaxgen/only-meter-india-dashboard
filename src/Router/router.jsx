@@ -39,6 +39,7 @@ import CustomerAgentManagement from "../Pages/CustomerAgentManagement.jsx";
 import DriverCustomerAgentManagement from "../Pages/DriverCustomerAgentManagement.jsx";
 import DriverTransactionHistoryPage from "../Pages/DriverTransactionHistoryPage.jsx";
 import DriverVehicleHistoryPage from "../Pages/DriverVehicleHistoryPage.jsx";
+import DriverPlanPurchase from "../Pages/Driverplanpurchase.jsx";
 // Redirects non-super_admin roles away from the analytics Dashboard
 // straight to the one section they're allowed to see.
 const ROLE_HOME = {
@@ -96,6 +97,7 @@ export const router = createBrowserRouter([
           { path: "intercity-booking", element: <InterCityHistory /> },
           { path: "reserved-booking", element: <ReservedBooking /> },
           { path: "subscription-plan", element: <SubscriptionPlan /> },
+          { path: "driver-subscription-purchases", element: <DriverPlanPurchase /> },
           { path: "vehicle-brand", element: <VehicleBrand /> },
           { path: "vehicle-model", element: <VehicleModel /> },
           { path: "vehicle-type", element: <VehicleType /> },

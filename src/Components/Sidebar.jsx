@@ -241,6 +241,23 @@ export default function Sidebar({ isOpen, onClose }) {
         ],
       },
       {
+        title: "Driver subscription's  Purchase History",
+        groups: [
+          {
+            key: "driver-sbs-purchase-history",
+            label: "Driver subscription's  Purchase History",
+            icon: ClipboardDocumentListIcon,
+            children: [
+              {
+                label: "Driver subscription's  Purchase History",
+                to: "/dashboard/driver-subscription-purchases",
+                icon: ClipboardDocumentListIcon,
+              },
+            ],
+          },
+        ],
+      },
+      {
         title: "SERVICE MANAGEMENT",
         items: [{ label: "Banner", to: "/dashboard/banner", icon: TicketIcon }],
       },
