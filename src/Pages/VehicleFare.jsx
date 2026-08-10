@@ -634,6 +634,20 @@ export default function VehicleFare() {
     }
   };
 
+  const fetchByUrl = async (url, page) => {
+    try {
+      const res = await fetch(url);
+      const json = await res.json();
+      setFares(json.data || []);
+      setTotalCount(json.count || 0);
+      setNextUrl(json.next || null);
+      setPrevUrl(json.previous || null);
+      if (page) setCurrentPage(page);
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  };
+
   useEffect(() => {
     fetchFares();
     refetchResource("types", "/type/");
@@ -657,7 +671,8 @@ export default function VehicleFare() {
     fetchFares("", "", 1);
   };
 
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+const isSinglePageResponse = !nextUrl && !prevUrl && fares.length === totalCount;
+  const totalPages = isSinglePageResponse ? 1 : Math.ceil(totalCount / PAGE_SIZE);
   const hasFilters = filterName || filterType;
 
   const openAdd = () => {
@@ -965,9 +980,7 @@ export default function VehicleFare() {
 
             <div className="flex items-center gap-1">
               <button
-                onClick={() =>
-                  fetchFares(filterName, filterType, currentPage - 1)
-                }
+                onClick={() => prevUrl && fetchByUrl(prevUrl, currentPage - 1)}
                 disabled={!prevUrl}
                 className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
@@ -991,9 +1004,7 @@ export default function VehicleFare() {
               )}
 
               <button
-                onClick={() =>
-                  fetchFares(filterName, filterType, currentPage + 1)
-                }
+                onClick={() => nextUrl && fetchByUrl(nextUrl, currentPage + 1)}
                 disabled={!nextUrl}
                 className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
