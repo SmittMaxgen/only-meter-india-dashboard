@@ -2,65 +2,96 @@
 import { useState, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import {
-  Squares2X2Icon,
-  UserIcon,
-  MapPinIcon,
-  ClipboardDocumentListIcon,
-  TicketIcon,
-  BanknotesIcon,
-  ChevronRightIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+  LayoutDashboard,
+  Car,
+  Bike,
+  Route,
+  MapPinned,
+  Package,
+  Users,
+  IdCard,
+  Wrench,
+  Award,
+  ClipboardCheck,
+  Layers,
+  CreditCard,
+  History,
+  Image,
+  Banknote,
+  Briefcase,
+  Headset,
+  ShieldCheck,
+  ChevronRight,
+  X,
+} from "lucide-react";
 
 // Sidebar width
 const WIDTH = "w-72"; // ~288px similar to screenshot
 
-function SectionTitle({ children }) {
-  return (
-    <div className="px-3 pt-6 pb-2 text-xs font-semibold tracking-wide text-gray-400">
-      {children}
-    </div>
-  );
-}
-
-function Item({ to, icon: Icon, label, onClick }) {
+function Item({ to, icon: Icon, label, onClick, nested }) {
   return (
     <NavLink
       to={to}
       onClick={onClick}
       className={({ isActive }) =>
-        `flex items-center font-bold gap-3 px-3 py-2 text-md transition-colors border-l-2 ${
+        `group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+          nested ? "ml-1" : ""
+        } ${
           isActive
-            ? "text-orange-600 border-orange-500 border-r-4"
-            : "text-gray-700 hover:bg-gray-100 border-transparent"
+            ? "bg-orange-50 text-orange-600"
+            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
         }`
       }
     >
-      {Icon && <Icon className={`h-5 w-5 text-black`} />}
-      <span>{label}</span>
+      {({ isActive }) => (
+        <>
+          {Icon && (
+            <Icon
+              className={`h-[18px] w-[18px] shrink-0 ${
+                isActive
+                  ? "text-orange-600"
+                  : "text-gray-400 group-hover:text-gray-600"
+              }`}
+              strokeWidth={2}
+            />
+          )}
+          <span className="truncate">{label}</span>
+        </>
+      )}
     </NavLink>
   );
 }
 
 function Group({ label, icon: Icon, children, isOpen, onToggle }) {
   return (
-    <div className="px-1">
+    <div>
       <button
         type="button"
         onClick={onToggle}
-        className={`w-full flex items-center font-bold justify-between px-2 py-2 rounded-md text-md hover:bg-gray-100 cursor-pointer`}
+        className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 ${
+          isOpen ? "bg-gray-50 text-gray-900" : ""
+        }`}
       >
-        <span className="flex items-center gap-3 text-gray-800">
-          {Icon && <Icon className="h-5 w-5 text-black" />}
+        <span className="flex items-center gap-3">
+          {Icon && (
+            <Icon
+              className="h-[18px] w-[18px] shrink-0 text-gray-400"
+              strokeWidth={2}
+            />
+          )}
           {label}
         </span>
-        <ChevronRightIcon
-          className={`h-4 w-4 text-gray-500 transition-transform ${
+        <ChevronRight
+          className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${
             isOpen ? "rotate-90" : ""
           }`}
         />
       </button>
-      {isOpen && <div className="mt-1 ml-9 space-y-1">{children}</div>}
+      {isOpen && (
+        <div className="mt-1 ml-4 space-y-0.5 border-l border-gray-200 pl-3">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -74,245 +105,211 @@ export default function Sidebar({ isOpen, onClose }) {
   const sections = useMemo(
     () => [
       {
-        title: "MAIN",
+        key: "main",
         items: [
-          { label: "Dashboard", to: "/dashboard/home", icon: Squares2X2Icon },
+          { label: "Dashboard", to: "/dashboard/home", icon: LayoutDashboard },
         ],
       },
       {
-        title: "BOOKING MANAGEMENT",
+        key: "booking",
         groups: [
           {
-            // "Cab Bookings" is now a collapsible group with two sub-pages:
-            // - Cab Booking  → vehicle_type !== "Auto"
-            // - Auto Booking → vehicle_type === "Auto"
             key: "cab-bookings",
             label: "Cab Bookings",
-            icon: ClipboardDocumentListIcon,
+            icon: Car,
             children: [
-              {
-                label: "Car Booking",
-                to: "/dashboard/cab-booking",
-                icon: ClipboardDocumentListIcon,
-              },
+              { label: "Car Booking", to: "/dashboard/cab-booking", icon: Car },
               {
                 label: "Auto Booking",
                 to: "/dashboard/auto-booking",
-                icon: ClipboardDocumentListIcon,
+                icon: Bike,
               },
             ],
           },
-          // {
-          //   key: "share-vehicles",
-          //   label: "Share Vehicles",
-          //   icon: ClipboardDocumentListIcon,
-          //   children: [
-          //     {
-          //       label: "Share Vehicles",
-          //       to: "/dashboard/share-vehicles",
-          //       icon: ClipboardDocumentListIcon,
-          //     },
-          //   ],
-          // },
         ],
       },
       {
-        title: "INTERCITY SERVICE",
+        key: "intercity",
         groups: [
           {
-            key: "intercity",
-            label: "Bookings",
-            icon: ClipboardDocumentListIcon,
+            key: "intercity-bookings",
+            label: "Intercity",
+            icon: Route,
             children: [
               {
                 label: "Intercity Booking",
                 to: "/dashboard/intercity-booking",
-                icon: ClipboardDocumentListIcon,
+                icon: Route,
               },
               {
                 label: "Reserved Booking",
                 to: "/dashboard/reserved-booking",
-                icon: ClipboardDocumentListIcon,
+                icon: MapPinned,
               },
             ],
           },
         ],
       },
       {
-        title: "RENTAL SERVICE",
+        key: "rental",
         items: [
           {
             label: "Rental Package",
             to: "/dashboard/rental-package",
-            icon: ClipboardDocumentListIcon,
+            icon: Package,
           },
         ],
       },
       {
-        title: "CUSTOMER MANAGEMENT",
+        key: "customers",
         items: [
-          { label: "Customers", to: "/dashboard/customers", icon: UserIcon },
+          { label: "Customers", to: "/dashboard/customers", icon: Users },
         ],
       },
       {
-        title: "DRIVER MANAGEMENT",
+        key: "driver",
         groups: [
           {
-            key: "driver",
+            key: "driver-mgmt",
             label: "Driver",
-            icon: UserIcon,
+            icon: IdCard,
             children: [
-              {
-                label: "Drivers",
-                to: "/dashboard/driver",
-                icon: ClipboardDocumentListIcon,
-              },
+              { label: "Drivers", to: "/dashboard/driver", icon: IdCard },
               {
                 label: "Driver Vehicles",
                 to: "/dashboard/driver-vehicles",
-                icon: ClipboardDocumentListIcon,
+                icon: Car,
               },
               {
                 label: "Driver Subscription",
                 to: "/dashboard/driver-subscription",
-                icon: ClipboardDocumentListIcon,
+                icon: Award,
               },
             ],
           },
         ],
       },
       {
-        title: "ONBOARDING MANAGEMENT",
+        key: "onboarding",
         items: [
           {
             label: "On Boarding",
             to: "/dashboard/onboarding",
-            icon: ClipboardDocumentListIcon,
+            icon: ClipboardCheck,
           },
         ],
       },
       {
-        title: "VEHICLE MANAGEMENT",
+        key: "vehicle",
         groups: [
           {
-            key: "vehicle",
+            key: "vehicle-details",
             label: "Vehicle Details",
-            icon: ClipboardDocumentListIcon,
+            icon: Wrench,
             children: [
-              {
-                label: "Brand",
-                to: "/dashboard/vehicle-brand",
-                icon: ClipboardDocumentListIcon,
-              },
-              {
-                label: "Model",
-                to: "/dashboard/vehicle-model",
-                icon: ClipboardDocumentListIcon,
-              },
-              {
-                label: "Type",
-                to: "/dashboard/vehicle-type",
-                icon: ClipboardDocumentListIcon,
-              },
-              {
-                label: "Vehicle",
-                to: "/dashboard/vehicles",
-                icon: ClipboardDocumentListIcon,
-              },
+              { label: "Brand", to: "/dashboard/vehicle-brand", icon: Layers },
+              { label: "Model", to: "/dashboard/vehicle-model", icon: Layers },
+              { label: "Type", to: "/dashboard/vehicle-type", icon: Layers },
+              { label: "Vehicle", to: "/dashboard/vehicles", icon: Car },
             ],
           },
         ],
       },
       {
-        title: "SUBSCRIPTION MANAGEMENT",
+        key: "subscription",
         groups: [
           {
             key: "subs",
             label: "Subscriptions",
-            icon: ClipboardDocumentListIcon,
+            icon: CreditCard,
             children: [
               {
-                label: "Subscription Plans",
-                to: "/dashboard/subscription-plan",
-                icon: ClipboardDocumentListIcon,
+                label: "Cab Ride Plan",
+                to: "/dashboard/ride-plan/cab",
+                icon: Car,
+              },
+              {
+                label: "Auto Ride Plan",
+                to: "/dashboard/ride-plan/auto",
+                icon: Bike,
               },
             ],
           },
         ],
       },
       {
-        title: "Driver subscription's  Purchase History",
+        key: "purchase-history",
         groups: [
           {
             key: "driver-sbs-purchase-history",
-            label: "Driver subscription's  Purchase History",
-            icon: ClipboardDocumentListIcon,
+            label: "Purchase History",
+            icon: History,
             children: [
               {
-                label: "Driver subscription's  Purchase History",
+                label: "Driver Subscription Purchases",
                 to: "/dashboard/driver-subscription-purchases",
-                icon: ClipboardDocumentListIcon,
+                icon: History,
               },
             ],
           },
         ],
       },
       {
-        title: "SERVICE MANAGEMENT",
-        items: [{ label: "Banner", to: "/dashboard/banner", icon: TicketIcon }],
+        key: "service",
+        items: [{ label: "Banner", to: "/dashboard/banner", icon: Image }],
       },
       {
-        title: "VEHICLE FARE",
+        key: "fare",
         items: [
           {
             label: "Vehicle Fare",
             to: "/dashboard/vehicle-fare",
-            icon: TicketIcon,
+            icon: Banknote,
           },
         ],
       },
       {
-        title: "Sales Agent Management",
+        key: "sales-agents",
         items: [
           {
             label: "Sales Agents",
             to: "/dashboard/sales-agents",
-            icon: TicketIcon,
+            icon: Briefcase,
           },
         ],
       },
       {
-        title: "Customer Support Agent Management",
+        key: "support-agents",
         items: [
           {
             label: "Customer Support Agents",
             to: "/dashboard/agents",
-            icon: TicketIcon,
+            icon: Headset,
           },
         ],
       },
-            {
-        title: "ADMIN CUSTOMER AND DRIVER MANAGEMENT",
+      {
+        key: "admin-management",
         groups: [
           {
             key: "admin-customer-driver-management",
-            label: "Driver Customer Manager Management",
-            icon: UserIcon,
+            label: "Admin Management",
+            icon: ShieldCheck,
             children: [
               {
                 label: "Customer Management",
                 to: "/dashboard/customer-agent-management",
-                icon: UserIcon,
+                icon: Users,
               },
               {
                 label: "Driver Management",
                 to: "/dashboard/driver-agent-management",
-                icon: UserIcon,
+                icon: IdCard,
               },
               {
-                label: "Driver Plus Customer Management",
+                label: "Driver + Customer Management",
                 to: "/dashboard/driver-pls-customer-management",
-                icon: UserIcon,
+                icon: ShieldCheck,
               },
             ],
           },
@@ -322,22 +319,22 @@ export default function Sidebar({ isOpen, onClose }) {
     [],
   );
 
-  // Filter sidebar sections based on logged-in admin's role
+  // Filter sidebar sections based on logged-in admin's role.
+  // NOTE: filtering now keys off section.key (stable) instead of the old
+  // section.title strings, since titles have been removed from the UI.
   const visibleSections = useMemo(() => {
     if (!role || role === "super_admin") {
       return sections;
     }
     if (role === "driver_manager") {
-      return sections.filter((sec) => sec.title === "DRIVER MANAGEMENT");
+      return sections.filter((sec) => sec.key === "driver");
     }
     if (role === "customer_manager") {
-      return sections.filter((sec) => sec.title === "CUSTOMER MANAGEMENT");
+      return sections.filter((sec) => sec.key === "customers");
     }
     if (role === "drv_pls_cust") {
       return sections.filter(
-        (sec) =>
-          sec.title === "DRIVER MANAGEMENT" ||
-          sec.title === "CUSTOMER MANAGEMENT",
+        (sec) => sec.key === "driver" || sec.key === "customers",
       );
     }
     return sections;
@@ -345,53 +342,57 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const Content = (
     <div
-      className={`h-full ${WIDTH} bg-white border-r border-gray-200 flex flex-col`}
+      className={`h-full ${WIDTH} flex flex-col border-r border-gray-200 bg-white`}
     >
-      {/* Close button on mobile */}
-      <div className="lg:hidden flex justify-end p-3">
+      {/* Brand / header */}
+      <div className="flex items-center justify-between px-4 py-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
+            <Car className="h-4 w-4 text-white" strokeWidth={2.5} />
+          </div>
+          <span className="text-base font-bold text-gray-900">Admin Panel</span>
+        </div>
         <button
           onClick={onClose}
           aria-label="Close sidebar"
-          className="p-2 rounded-md hover:bg-gray-100 text-gray-600"
+          className="rounded-md p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
         >
-          <XMarkIcon className="h-5 w-5" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto pb-6">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-6">
         {visibleSections.map((sec) => (
-          <div key={sec.title}>
-            <SectionTitle>{sec.title}</SectionTitle>
-            <div className="space-y-1">
-              {sec.items?.map((item) => (
-                <Item
-                  key={item.label}
-                  to={item.to}
-                  icon={item.icon}
-                  label={item.label}
-                  onClick={onClose}
-                />
-              ))}
-              {sec.groups?.map((g) => (
-                <Group
-                  key={g.key}
-                  label={g.label}
-                  icon={g.icon}
-                  isOpen={!!openGroups[g.key]}
-                  onToggle={() => toggle(g.key)}
-                >
-                  {g.children.map((c) => (
-                    <Item
-                      key={c.label}
-                      to={c.to}
-                      icon={c.icon}
-                      label={c.label}
-                      onClick={onClose}
-                    />
-                  ))}
-                </Group>
-              ))}
-            </div>
+          <div key={sec.key} className="space-y-1">
+            {sec.items?.map((item) => (
+              <Item
+                key={item.label}
+                to={item.to}
+                icon={item.icon}
+                label={item.label}
+                onClick={onClose}
+              />
+            ))}
+            {sec.groups?.map((g) => (
+              <Group
+                key={g.key}
+                label={g.label}
+                icon={g.icon}
+                isOpen={!!openGroups[g.key]}
+                onToggle={() => toggle(g.key)}
+              >
+                {g.children.map((c) => (
+                  <Item
+                    key={c.label}
+                    to={c.to}
+                    icon={c.icon}
+                    label={c.label}
+                    onClick={onClose}
+                    nested
+                  />
+                ))}
+              </Group>
+            ))}
           </div>
         ))}
       </nav>
@@ -405,7 +406,9 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Mobile drawer */}
       <div
-        className={`lg:hidden fixed inset-0 z-40 ${isOpen ? "" : "pointer-events-none"}`}
+        className={`fixed inset-0 z-40 lg:hidden ${
+          isOpen ? "" : "pointer-events-none"
+        }`}
         aria-hidden={!isOpen}
       >
         {/* Overlay */}

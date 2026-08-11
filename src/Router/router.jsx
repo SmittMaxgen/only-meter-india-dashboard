@@ -27,7 +27,8 @@ import VehicleModel from "../Pages/VehicleModel.jsx";
 import VehicleType from "../Pages/VehicleType.jsx";
 import Vehicle from "../Pages/Vehicle.jsx";
 import SupportTicket from "../Pages/SupportTicket.jsx";
-import SubscriptionPlan from "../Pages/SubscriptionPlan.jsx";
+import CabRidePlan from "../Pages/CabRidePlan.jsx";
+import AutoRidePlan from "../Pages/AutoRidePlan.jsx";
 import Customers from "../Pages/Customers.jsx";
 import CustomerDetail from "../Pages/CustomerDetail.jsx";
 import Banner from "../Pages/Banner.jsx";
@@ -96,8 +97,12 @@ export const router = createBrowserRouter([
           { path: "onboarding", element: <OnBoarding /> },
           { path: "intercity-booking", element: <InterCityHistory /> },
           { path: "reserved-booking", element: <ReservedBooking /> },
-          { path: "subscription-plan", element: <SubscriptionPlan /> },
-          { path: "driver-subscription-purchases", element: <DriverPlanPurchase /> },
+          { path: "ride-plan/cab", element: <CabRidePlan /> },
+          { path: "ride-plan/auto", element: <AutoRidePlan /> },
+          {
+            path: "driver-subscription-purchases",
+            element: <DriverPlanPurchase />,
+          },
           { path: "vehicle-brand", element: <VehicleBrand /> },
           { path: "vehicle-model", element: <VehicleModel /> },
           { path: "vehicle-type", element: <VehicleType /> },
@@ -109,11 +114,26 @@ export const router = createBrowserRouter([
           { path: "vehicle-fare", element: <VehicleFare /> },
           { path: "sales-agents", element: <SalesAgents /> },
           { path: "agents", element: <Agents /> },
-          { path: "driver-agent-management", element: <DriverAgentManagement /> },
-          { path: "customer-agent-management", element: <CustomerAgentManagement /> },
-          { path: "driver-pls-customer-management", element: <DriverCustomerAgentManagement /> },
-          { path: "driver/transaction-history/:id", element: <DriverTransactionHistoryPage /> },
-          { path: "driver/vehicles/:id", element: <DriverVehicleHistoryPage /> },
+          {
+            path: "driver-agent-management",
+            element: <DriverAgentManagement />,
+          },
+          {
+            path: "customer-agent-management",
+            element: <CustomerAgentManagement />,
+          },
+          {
+            path: "driver-pls-customer-management",
+            element: <DriverCustomerAgentManagement />,
+          },
+          {
+            path: "driver/transaction-history/:id",
+            element: <DriverTransactionHistoryPage />,
+          },
+          {
+            path: "driver/vehicles/:id",
+            element: <DriverVehicleHistoryPage />,
+          },
           { path: "*", element: <WorkInProgress /> },
         ],
       },
