@@ -177,6 +177,20 @@ function planLabel(p) {
   return `#${p}`;
 }
 
+function formatDateTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "—";
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 // ---------------------- Main Component ----------------------
 export default function DriverPlanPurchase() {
   const { fetchedData, postData, refetchResource } = useAppContext();
@@ -272,10 +286,12 @@ export default function DriverPlanPurchase() {
                   <td className="px-4 py-3">
                     <StatusBadge status={r.status} />
                   </td>
-                  <td className="px-4 py-3">
-                    {r.purchased_at || r.created_at || "—"}
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {formatDateTime(r.purchased_at || r.created_at)}
                   </td>
-                  <td className="px-4 py-3">{r.expires_at || "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {formatDateTime(r.expires_at)}
+                  </td>
                 </tr>
               ))}
 

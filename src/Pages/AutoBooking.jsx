@@ -174,7 +174,7 @@ export default function AutoBooking() {
                   <tr key={booking.id} className="border-t border-gray-100">
                     <td className="px-4 py-3">{booking.user_data.full_name}</td>
                     <td className="px-4 py-3">
-                      {booking.driver_data?.name || "-"}
+                      {`${booking.driver_data?.first_name || "N/A"} ${booking.driver_data?.last_name || ""}`}
                     </td>
                     <td className="px-4 py-3">
                       {booking.vehicle_type ||

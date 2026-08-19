@@ -19,7 +19,7 @@ export default function Customers() {
   const pageSize = 10;
 
   const role = localStorage.getItem("role");
-const canManage =
+  const canManage =
     !role ||
     role === "super_admin" ||
     role === "customer_manager" ||
@@ -138,9 +138,9 @@ const canManage =
       "Full Name": r.full_name || "-",
       "Mobile No": r.mobile_no || "-",
       Email: r.email || "-",
-      City: r.address_data?.city || "-",
-      State: r.address_data?.state || "-",
-      Country: r.address_data?.country || "-",
+      City: r.city || "-",
+      State: r.state || "-",
+      Country: r.country || "-",
       Latitude: r.latitude ?? "-",
       Longitude: r.longitude ?? "-",
       "Nearby Drivers": r.nearby_driver_count ?? 0,

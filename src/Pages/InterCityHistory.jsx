@@ -184,7 +184,7 @@ export default function CabBooking() {
                   >
                     <td className="px-4 py-3">{booking.user_data.full_name}</td>
                     <td className="px-4 py-3">
-                      {booking.driver_data?.name || "-"}
+                      {`${booking.driver_data?.first_name || "N/A"} ${booking.driver_data?.last_name || ""}`}
                     </td>
                     <td className="px-4 py-3">
                       {booking.vehicle_type_data?.type_data?.name || "-"}

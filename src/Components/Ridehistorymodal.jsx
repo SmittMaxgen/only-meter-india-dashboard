@@ -41,9 +41,12 @@ export default function RideHistoryModal({
 
   // Entity (driver/customer) details — no API call, uses data already in the row
   const [selectedEntity, setSelectedEntity] = useState(null);
-// Ride ID search
+  // Ride ID search
   const [searchRideId, setSearchRideId] = useState("");
   const [searchError, setSearchError] = useState("");
+
+  // Status tab filter: "all" | "completed" | "cancelled"
+  const [statusTab, setStatusTab] = useState("all");
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -64,7 +67,7 @@ export default function RideHistoryModal({
     setSelectedEntity(null);
   }, [entityId, entityType]);
 
- useEffect(() => {
+  useEffect(() => {
     if (!entityId || initialRideId) return;
 
     const fetchRides = async () => {
@@ -172,6 +175,14 @@ export default function RideHistoryModal({
 
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
+  const displayedRides = rides.filter((ride) => {
+    if (statusTab === "all") return true;
+    if (statusTab === "completed") return ride.status === "completed";
+    if (statusTab === "cancelled")
+      return ride.status === "cancle" || ride.status === "cancelled";
+    return true;
+  });
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -222,6 +233,41 @@ export default function RideHistoryModal({
               </div>
             )}
 
+            {!loading && rides.length > 0 && (
+              <div className="flex items-center gap-2 mb-4">
+                <button
+                  onClick={() => setStatusTab("all")}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
+                    statusTab === "all"
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setStatusTab("completed")}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
+                    statusTab === "completed"
+                      ? "bg-green-600 text-white border-green-600"
+                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  Completed
+                </button>
+                <button
+                  onClick={() => setStatusTab("cancelled")}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
+                    statusTab === "cancelled"
+                      ? "bg-red-600 text-white border-red-600"
+                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  Cancelled
+                </button>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 mb-4">
               <input
                 type="text"
@@ -245,7 +291,13 @@ export default function RideHistoryModal({
               <div className="text-sm text-red-600 mb-3">{searchError}</div>
             )}
 
-            {!loading && rides.length > 0 && (
+            {!loading && rides.length > 0 && displayedRides.length === 0 && (
+              <div className="py-10 text-center text-gray-500">
+                No {statusTab} rides on this page.
+              </div>
+            )}
+
+            {!loading && displayedRides.length > 0 && (
               <>
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
@@ -254,6 +306,8 @@ export default function RideHistoryModal({
                         <th className="px-3 py-2 font-medium">Ride ID</th>
                         <th className="px-3 py-2 font-medium">Pickup</th>
                         <th className="px-3 py-2 font-medium">Drop</th>
+                        <th className="px-3 py-2 font-medium">Started At</th>
+                        <th className="px-3 py-2 font-medium">Arrived At</th>
                         <th className="px-3 py-2 font-medium">Status</th>
                         <th className="px-3 py-2 font-medium">Fare</th>
                         <th className="px-3 py-2 font-medium">Date</th>
@@ -261,7 +315,7 @@ export default function RideHistoryModal({
                       </tr>
                     </thead>
                     <tbody>
-                      {rides.map((ride) => (
+                      {displayedRides.map((ride) => (
                         <tr
                           key={ride.id}
                           className="border-t border-gray-100 hover:bg-orange-50"
@@ -274,6 +328,12 @@ export default function RideHistoryModal({
                           </td>
                           <td className="px-3 py-2 text-gray-700 max-w-xs truncate">
                             {ride.drop_address || "-"}
+                          </td>
+                          <td className="px-3 py-2 text-gray-700 max-w-xs truncate">
+                            {ride.started_at || "-"}
+                          </td>
+                          <td className="px-3 py-2 text-gray-700 max-w-xs truncate">
+                            {ride.arrived_at || "-"}
                           </td>
                           <td className="px-3 py-2">
                             <span
