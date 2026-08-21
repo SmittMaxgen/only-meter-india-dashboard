@@ -455,10 +455,13 @@ export default function Drivers() {
           </button>
         </div>
       </div>
-      Search Ride ID
+      {/* Search Ride ID */}
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-x-auto"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "#e9e7e5 #f3f4f6" }}
+        >
           {loading ? (
             <div className="py-10 text-center text-gray-500">
               <div className="inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
