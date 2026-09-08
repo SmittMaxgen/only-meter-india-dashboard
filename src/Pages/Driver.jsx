@@ -39,13 +39,77 @@ export default function Drivers() {
   const [rideIdFilter, setRideIdFilter] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
   const [updatingActiveId, setUpdatingActiveId] = useState(null);
-  // Auto-open ride modal when navigated here via ?rideId= (e.g. from Topbar)
+  const [resolvingPhone, setResolvingPhone] = useState(false);
+  const [rideDataToShow, setRideDataToShow] = useState(null);
+  // Auto-open ride modal when navigated here via ?rideId= or ?phone= (e.g. from Topbar)
   useEffect(() => {
     const paramRideId = searchParams.get("rideId");
+    const paramPhone = searchParams.get("phone");
+
     if (paramRideId) {
       setRideIdToOpen(paramRideId);
       setRideHistoryTarget(null);
       setRideHistoryOpen(true);
+      return;
+    }
+
+    if (paramPhone) {
+      const resolvePhoneToRide = async () => {
+        try {
+          setResolvingPhone(true);
+          const res = await fetch(
+            `${baseUrl}/ride_request/?driver_phone=${paramPhone}`,
+          );
+          if (!res.ok) throw new Error("Search request failed");
+
+          const data = await res.json();
+          const rides = Array.isArray(data)
+            ? data
+            : Array.isArray(data?.data)
+              ? data.data
+              : Array.isArray(data?.results)
+                ? data.results
+                : data?.data
+                  ? [data.data]
+                  : [];
+
+          if (!rides.length) {
+            Swal.fire({
+              toast: true,
+              position: "top-end",
+              icon: "warning",
+              title: "No rides found for this driver phone number",
+              showConfirmButton: false,
+              timer: 2500,
+              timerProgressBar: true,
+            });
+            setSearchParams({});
+            return;
+          }
+
+          const firstRide = rides[0];
+          setRideDataToShow(firstRide);
+          setRideIdToOpen(null);
+          setRideHistoryTarget(null);
+          setRideHistoryOpen(true);
+        } catch (err) {
+          console.error("Phone search failed:", err);
+          Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "error",
+            title: "Search failed. Please try again.",
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+          });
+          setSearchParams({});
+        } finally {
+          setResolvingPhone(false);
+        }
+      };
+
+      resolvePhoneToRide();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -332,14 +396,16 @@ export default function Drivers() {
   };
 
   // When ride history is open → hide driver list, show only rides
-  if (rideHistoryOpen && (rideHistoryTarget || rideIdToOpen)) {
-    return (
+  if (rideHistoryOpen && (rideHistoryTarget || rideIdToOpen || rideDataToShow)) {
+  return (
       <RideHistoryModal
         onClose={() => {
           setRideHistoryOpen(false);
           setRideHistoryTarget(null);
           setRideIdToOpen(null);
-          if (searchParams.get("rideId")) setSearchParams({});
+          setRideDataToShow(null);
+          if (searchParams.get("rideId") || searchParams.get("phone"))
+            setSearchParams({});
         }}
         entityId={rideHistoryTarget?.id}
         entityType="driver"
@@ -349,6 +415,7 @@ export default function Drivers() {
             : ""
         }
         initialRideId={rideIdToOpen}
+        initialRideData={rideDataToShow}
       />
     );
   }

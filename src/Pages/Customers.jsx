@@ -10,9 +10,11 @@ import { useAppContext } from "../Central_Store/app_context.jsx";
 import { Link, useSearchParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import RideHistoryModal from "../Components/RideHistoryModal.jsx";
+import Swal from "sweetalert2";
 
 export default function Customers() {
-  const { fetchedData, deleteData, refetchResource, getData } = useAppContext();
+  const { fetchedData, deleteData, refetchResource, getData, baseUrl } =
+    useAppContext();
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -30,14 +32,78 @@ export default function Customers() {
   const [rideHistoryTarget, setRideHistoryTarget] = useState(null);
   const [rideIdToOpen, setRideIdToOpen] = useState(null);
   const [rideIdFilter, setRideIdFilter] = useState("");
+  const [resolvingPhone, setResolvingPhone] = useState(false);
+  const [rideDataToShow, setRideDataToShow] = useState(null);
 
-  // Auto-open ride modal when navigated here via ?rideId= (e.g. from Topbar)
+  // Auto-open ride modal when navigated here via ?rideId= or ?phone= (e.g. from Topbar)
   useEffect(() => {
     const paramRideId = searchParams.get("rideId");
+    const paramPhone = searchParams.get("phone");
+
     if (paramRideId) {
       setRideIdToOpen(paramRideId);
       setRideHistoryTarget(null);
       setRideHistoryOpen(true);
+      return;
+    }
+
+    if (paramPhone) {
+      const resolvePhoneToRide = async () => {
+        try {
+          setResolvingPhone(true);
+          const res = await fetch(
+            `${baseUrl}/ride_request/?user_phone=${paramPhone}`,
+          );
+          if (!res.ok) throw new Error("Search request failed");
+
+          const data = await res.json();
+          const rides = Array.isArray(data)
+            ? data
+            : Array.isArray(data?.data)
+              ? data.data
+              : Array.isArray(data?.results)
+                ? data.results
+                : data?.data
+                  ? [data.data]
+                  : [];
+
+          if (!rides.length) {
+            Swal.fire({
+              toast: true,
+              position: "top-end",
+              icon: "warning",
+              title: "No rides found for this customer phone number",
+              showConfirmButton: false,
+              timer: 2500,
+              timerProgressBar: true,
+            });
+            setSearchParams({});
+            return;
+          }
+
+          const firstRide = rides[0];
+          setRideDataToShow(firstRide);
+          setRideIdToOpen(null);
+          setRideHistoryTarget(null);
+          setRideHistoryOpen(true);
+        } catch (err) {
+          console.error("Phone search failed:", err);
+          Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "error",
+            title: "Search failed. Please try again.",
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+          });
+          setSearchParams({});
+        } finally {
+          setResolvingPhone(false);
+        }
+      };
+
+      resolvePhoneToRide();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -167,19 +233,22 @@ export default function Customers() {
   };
 
   // When ride history is open → hide customer list, show only rides
-  if (rideHistoryOpen && (rideHistoryTarget || rideIdToOpen)) {
+  if (rideHistoryOpen && (rideHistoryTarget || rideIdToOpen || rideDataToShow)) {
     return (
       <RideHistoryModal
         onClose={() => {
           setRideHistoryOpen(false);
           setRideHistoryTarget(null);
           setRideIdToOpen(null);
-          if (searchParams.get("rideId")) setSearchParams({});
+          setRideDataToShow(null);
+          if (searchParams.get("rideId") || searchParams.get("phone"))
+            setSearchParams({});
         }}
         entityId={rideHistoryTarget?.id}
         entityType="user"
         entityLabel={rideHistoryTarget?.full_name || ""}
         initialRideId={rideIdToOpen}
+        initialRideData={rideDataToShow}
       />
     );
   }

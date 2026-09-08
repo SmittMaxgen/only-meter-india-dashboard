@@ -1209,8 +1209,59 @@ export default function DriverDetail() {
                 label="Fuel Type"
                 value={driver?.vehicle_data?.fuelType}
               />
+
+              {Array.isArray(driver?.vehicle_list) &&
+                driver.vehicle_list.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-800 mb-3">
+                      All Vehicles ({driver.vehicle_list.length})
+                    </h3>
+                    <div className="space-y-3">
+                      {driver.vehicle_list.map((v) => (
+                        <div
+                          key={v.id}
+                          className="bg-white rounded-lg border border-gray-200 p-3 text-xs text-gray-700"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-gray-900">
+                              {v.brand_data?.name} {v.model_data?.name}
+                            </span>
+                            <div className="flex items-center space-x-1">
+                              {v.is_selected && (
+                                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-medium">
+                                  Selected
+                                </span>
+                              )}
+                              {v.verified ? (
+                                <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-medium">
+                                  Verified
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-medium">
+                                  Unverified
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                            <span>Type: {v.type_data?.name || "-"}</span>
+                            <span>Seats: {v.seats || "-"}</span>
+                            <span>Mode: {v.vehicleMode || "-"}</span>
+                            <span>Fuel: {v.fuelType || "-"}</span>
+                            <span>Year: {v.vehicle_year || "-"}</span>
+                            <span>Ownership: {v.ownership_type || "-"}</span>
+                            <span className="col-span-2">
+                              RC No: {v.rc_number || "-"}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
           ) : (
+
             <div className="space-y-3 text-sm text-gray-700">
               <EditField label="Brand">
                 <select

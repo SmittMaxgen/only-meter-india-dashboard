@@ -30,6 +30,7 @@ export default function RideHistoryModal({
   entityType,
   entityLabel,
   initialRideId,
+  initialRideData,
 }) {
   const { baseUrl } = useAppContext();
   const [rides, setRides] = useState([]);
@@ -67,8 +68,8 @@ export default function RideHistoryModal({
     setSelectedEntity(null);
   }, [entityId, entityType]);
 
-  useEffect(() => {
-    if (!entityId || initialRideId) return;
+    useEffect(() => {
+    if (!entityId || initialRideId || initialRideData) return;
 
     const fetchRides = async () => {
       setLoading(true);
@@ -107,6 +108,13 @@ export default function RideHistoryModal({
     handleViewRideDetails(initialRideId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialRideId]);
+
+  // Ride data already fetched by caller (e.g. phone search) — display directly, no API call
+  useEffect(() => {
+    if (!initialRideData) return;
+    setSelectedEntity(null);
+    setSelectedRide(initialRideData);
+  }, [initialRideData]);
 
   // Eye icon — no API call, just use the entity object already present on the row
   const handleViewEntity = (ride) => {
@@ -159,9 +167,10 @@ export default function RideHistoryModal({
     }
   };
 
-  const goBack = () => {
+    const goBack = () => {
     if (selectedEntity) return setSelectedEntity(null);
-    if (selectedRide && !initialRideId) return setSelectedRide(null);
+    if (selectedRide && !initialRideId && !initialRideData)
+      return setSelectedRide(null);
     onClose();
   };
 
@@ -211,14 +220,14 @@ export default function RideHistoryModal({
 
       {/* Content */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
-        {initialRideId && !selectedRide && !selectedEntity && (
+         {initialRideId && !selectedRide && !selectedEntity && (
           <div className="py-10 text-center text-gray-500">
             <div className="inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
             <div className="mt-3">Loading ride details...</div>
           </div>
         )}
 
-        {!selectedRide && !selectedEntity && !initialRideId && (
+        {!selectedRide && !selectedEntity && !initialRideId && !initialRideData && (
           <>
             {loading && (
               <div className="py-10 text-center text-gray-500">

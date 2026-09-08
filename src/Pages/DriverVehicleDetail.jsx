@@ -341,24 +341,24 @@ export default function DriverDetail() {
             )}
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-700">Pan Card:</p>
+            {/* <p className="text-sm font-medium text-gray-700">Pan Card:</p>
             {driverVehicleData.pan_card && (
               <FileDisplay 
                 fileUrl={driverVehicleData.pan_card}
                 fileName="Pan Card"
                 alt="Pan Card"
               />
-            )}
+            )} */}
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-700">Permit:</p>
+            {/* <p className="text-sm font-medium text-gray-700">Permit:</p>
              {driverVehicleData.permit && (
               <FileDisplay 
                 fileUrl={driverVehicleData.permit}
                 fileName="Permit"
                 alt="Permit"
               />
-            )}
+            )} */}
           </div>
         </div>
       </div>
