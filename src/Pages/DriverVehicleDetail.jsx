@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAppContext } from "../Central_Store/app_context.jsx";
+import DocPreview from "../CommonComponents/DocPreview.jsx";
 
 export default function DriverDetail() {
   const { id } = useParams();
@@ -10,6 +11,14 @@ export default function DriverDetail() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState("");
+
+  // Robust PDF detector — checks extension anywhere in the URL/path,
+  // and optionally a mime/type field if your API sends one
+  const isPdfFile = (fileUrl, mimeType) => {
+    if (mimeType) return mimeType.toLowerCase().includes("pdf");
+    if (!fileUrl) return false;
+    return /\.pdf(\?|#|$)/i.test(fileUrl);
+  };
 
   useEffect(() => {
     const fetchDriver = async () => {
@@ -79,89 +88,110 @@ export default function DriverDetail() {
     });
   }
 
-  function FileDisplay({ fileUrl, fileName, alt = 'File' }) {
-  const [fileError, setFileError] = useState(false);
+  function FileDisplay({ fileUrl, fileName, alt = "File" }) {
+    const [fileError, setFileError] = useState(false);
 
-  const getFileInfo = (url) => {
-    const extension = url.split('.').pop().toLowerCase();
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-    const pdfExtension = 'pdf';
-    
-    return {
-      extension,
-      isImage: imageExtensions.includes(extension),
-      isPdf: extension === pdfExtension,
-      isOther: !imageExtensions.includes(extension) && extension !== pdfExtension
+    const getFileInfo = (url) => {
+      const extension = url.split(".").pop().toLowerCase();
+      const imageExtensions = [
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "bmp",
+        "webp",
+        "svg",
+      ];
+      const pdfExtension = "pdf";
+
+      return {
+        extension,
+        isImage: imageExtensions.includes(extension),
+        isPdf: extension === pdfExtension,
+        isOther:
+          !imageExtensions.includes(extension) && extension !== pdfExtension,
+      };
     };
-  };
 
-  const fileInfo = getFileInfo(fileUrl);
-  const fullUrl = `${baseUrl}${fileUrl}`;
+    const fileInfo = getFileInfo(fileUrl);
+    const fullUrl = `${baseUrl}${fileUrl}`;
 
-  const handleClick = () => {
-    window.open(fullUrl, '_blank');
-  };
+    const handleClick = () => {
+      window.open(fullUrl, "_blank");
+    };
 
-  const handleError = () => {
-    setFileError(true);
-  };
+    const handleError = () => {
+      setFileError(true);
+    };
 
-  const renderContent = () => {
-    if (fileError) {
+    const renderContent = () => {
+      if (fileError) {
+        return (
+          <div className="h-40 w-64 flex items-center justify-center bg-red-50">
+            <span className="text-sm text-red-500">Failed to load</span>
+          </div>
+        );
+      }
+
+      if (fileInfo.isImage) {
+        return (
+          <img
+            src={fullUrl}
+            alt={alt}
+            className="h-40 w-64 object-cover"
+            onError={handleError}
+          />
+        );
+      }
+
+      if (fileInfo.isPdf) {
+        return (
+          <div className="h-40 w-64 flex flex-col items-center justify-center bg-red-50">
+            <svg
+              className="w-10 h-10 text-red-500 mb-1"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M4 18h12v-2H4v2zM4 14h12v-2H4v2zM4 10h12V8H4v2zM4 6h12V4H4v2zM2 2h16v16H2V2z" />
+            </svg>
+            <span className="text-xs text-gray-600">
+              {fileName} PDF Document
+            </span>
+          </div>
+        );
+      }
+
       return (
-        <div className="h-40 w-64 flex items-center justify-center bg-red-50">
-          <span className="text-sm text-red-500">Failed to load</span>
-        </div>
-      );
-    }
-
-    if (fileInfo.isImage) {
-      return (
-        <img
-          src={fullUrl}
-          alt={alt}
-          className="h-40 w-64 object-cover"
-          onError={handleError}
-        />
-      );
-    }
-
-    if (fileInfo.isPdf) {
-      return (
-        <div className="h-40 w-64 flex flex-col items-center justify-center bg-red-50">
-          <svg className="w-10 h-10 text-red-500 mb-1" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 18h12v-2H4v2zM4 14h12v-2H4v2zM4 10h12V8H4v2zM4 6h12V4H4v2zM2 2h16v16H2V2z"/>
+        <div className="h-40 w-64 flex flex-col items-center justify-center bg-gray-50">
+          <svg
+            className="w-10 h-10 text-gray-400 mb-1"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M9 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H9zm0 2h6v12H9V4z" />
           </svg>
-          <span className="text-xs text-gray-600">{fileName} PDF Document</span>
+          <span className="text-xs text-gray-600">
+            {fileInfo.extension?.toUpperCase() || "File"}
+          </span>
         </div>
       );
-    }
+    };
 
     return (
-      <div className="h-40 w-64 flex flex-col items-center justify-center bg-gray-50">
-        <svg className="w-10 h-10 text-gray-400 mb-1" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H9zm0 2h6v12H9V4z"/>
-        </svg>
-        <span className="text-xs text-gray-600">{fileInfo.extension?.toUpperCase() || 'File'}</span>
+      <div
+        className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200 bg-white hover:border-orange-500 transition-all duration-200 shadow-sm hover:shadow-md w-64"
+        onClick={handleClick}
+      >
+        {/* Main Content */}
+        <div className="relative">
+          {renderContent()}
+
+          {/* Simple Overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200" />
+        </div>
       </div>
     );
-  };
-
-  return (
-    <div 
-      className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200 bg-white hover:border-orange-500 transition-all duration-200 shadow-sm hover:shadow-md w-64"
-      onClick={handleClick}
-    >
-      {/* Main Content */}
-      <div className="relative">
-        {renderContent()}
-        
-        {/* Simple Overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200" />      
-      </div>
-    </div>
-  );
-}
+  }
 
   return (
     <div className="space-y-6">
@@ -172,7 +202,8 @@ export default function DriverDetail() {
             Driver Vehicle Detail
           </h1>
           <div className="text-sm text-gray-500">
-            Dashboard <Link to="/dashboard/driver-vehicles">/ Driver Vehicle</Link>{" "}
+            Dashboard{" "}
+            <Link to="/dashboard/driver-vehicles">/ Driver Vehicle</Link>{" "}
             <span className="text-orange-500">/ Detail</span>
           </div>
         </div>
@@ -218,7 +249,10 @@ export default function DriverDetail() {
             <div className="flex">
               <span className="font-medium w-36">Name</span>
               <span className="mr-2">:</span>
-              <span>{driverVehicleData.driver_data.first_name} {driverVehicleData.driver_data.last_name}</span>
+              <span>
+                {driverVehicleData.driver_data.first_name}{" "}
+                {driverVehicleData.driver_data.last_name}
+              </span>
             </div>
             <div className="flex">
               <span className="font-medium w-36">Email</span>
@@ -297,68 +331,36 @@ export default function DriverDetail() {
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
           Vehicle Documents
         </h2>
+
         <div className="grid md:grid-cols-3 gap-6">
           <div>
-            <p className="text-sm font-medium text-gray-700">RC Number: {driverVehicleData.rc_number || "-"}</p>
-            {driverVehicleData.rc_image && (
-              <img
-                src={`${baseUrl}${driverVehicleData.rc_image}`}
-                alt="RC Document"
-                className="h-40 w-64 object-cover rounded-md border border-gray-300 cursor-pointer hover:scale-105 transition-transform"
-                onClick={() =>
-                  window.open(`${baseUrl}${driverVehicleData.rc_image}`, "_blank")
-                }
-              />
-            )}
+            <p className="text-sm font-medium text-gray-700">
+              RC Number: {driverVehicleData.rc_number || "-"}
+            </p>
+            <DocPreview
+              fileUrl={driverVehicleData.rc_image}
+              alt="RC Document"
+            />
           </div>
 
           <div>
             <p className="text-sm font-medium text-gray-700">
               Insurance Number: {driverVehicleData.insurance_number || "-"}
             </p>
-            {driverVehicleData.insurance_image && (
-              <img
-                src={`${baseUrl}${driverVehicleData.insurance_image}`}
-                alt="Insurance Document"
-                className="h-40 w-64 object-cover rounded-md border border-gray-300 cursor-pointer hover:scale-105 transition-transform"
-                onClick={() =>
-                  window.open(
-                    `${baseUrl}${driverVehicleData.insurance_image}`,
-                    "_blank"
-                  )
-                }
-              />
-            )}
+            <DocPreview
+              fileUrl={driverVehicleData.insurance_image}
+              alt="Insurance Document"
+            />
           </div>
+
           <div>
-            <p className="text-sm font-medium text-gray-700">Aadhar Card:</p>
-            {driverVehicleData.aadhar_card && (
-              <FileDisplay 
-                fileUrl={driverVehicleData.aadhar_card}
-                fileName="Aadhar Card"
-                alt="Aadhar Card"
-              />
-            )}
-          </div>
-          <div>
-            {/* <p className="text-sm font-medium text-gray-700">Pan Card:</p>
-            {driverVehicleData.pan_card && (
-              <FileDisplay 
-                fileUrl={driverVehicleData.pan_card}
-                fileName="Pan Card"
-                alt="Pan Card"
-              />
-            )} */}
-          </div>
-          <div>
-            {/* <p className="text-sm font-medium text-gray-700">Permit:</p>
-             {driverVehicleData.permit && (
-              <FileDisplay 
-                fileUrl={driverVehicleData.permit}
-                fileName="Permit"
-                alt="Permit"
-              />
-            )} */}
+            <p className="text-sm font-medium text-gray-700">
+              PUC: {driverVehicleData.puc_number || "N/A"}
+            </p>
+            <DocPreview
+              fileUrl={driverVehicleData?.puc_image}
+              alt="PUC Document"
+            />
           </div>
         </div>
       </div>
