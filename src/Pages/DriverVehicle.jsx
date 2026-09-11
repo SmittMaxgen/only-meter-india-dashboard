@@ -206,6 +206,7 @@ export default function DriverVehicles() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [verifiedTab, setVerifiedTab] = useState("all");
   const pageSize = 10;
 
   useEffect(() => {
@@ -217,15 +218,23 @@ export default function DriverVehicles() {
   }, [fetchedData.driverVehicles]);
 
   const filtered = useMemo(() => {
-    if (!query) return driverVehicleData;
+    let list = driverVehicleData;
+
+    if (verifiedTab === "verified") {
+      list = list.filter((r) => r.verified === true);
+    } else if (verifiedTab === "unverified") {
+      list = list.filter((r) => r.verified !== true);
+    }
+
+    if (!query) return list;
     const q = query.toLowerCase();
-    return driverVehicleData.filter(
+    return list.filter(
       (r) =>
         r.rc_number?.toLowerCase().includes(q) ||
         r.insurance_number?.toLowerCase().includes(q) ||
         r.driver_data.name?.toLowerCase().includes(q),
     );
-  }, [query, driverVehicleData]);
+  }, [query, driverVehicleData, verifiedTab]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const current = filtered.slice((page - 1) * pageSize, page * pageSize);
@@ -326,6 +335,30 @@ export default function DriverVehicles() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Verified Tabs */}
+      <div className="bg-white rounded-xl border border-gray-200 p-2 flex gap-2">
+        {[
+          { key: "all", label: "All" },
+          { key: "verified", label: "Verified" },
+          { key: "unverified", label: "Not Verified" },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => {
+              setVerifiedTab(tab.key);
+              setPage(1);
+            }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              verifiedTab === tab.key
+                ? "bg-orange-500 text-white"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Table */}

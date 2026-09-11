@@ -147,6 +147,7 @@ export default function Drivers() {
   const [countryFilter, setCountryFilter] = useState("");
   const [phoneFilter, setPhoneFilter] = useState("");
   const [filterLoading, setFilterLoading] = useState(false);
+  const [verificationTab, setVerificationTab] = useState("all");
 
   useEffect(() => {
     refetchResource("drivers", "/driver/");
@@ -197,15 +198,23 @@ export default function Drivers() {
   }, [fetchedData?.drivers]);
 
   const filtered = useMemo(() => {
-    if (!query) return drivers;
+    let list = drivers;
+
+    if (verificationTab !== "all") {
+      list = list.filter(
+        (r) => (r.verification || "pending") === verificationTab,
+      );
+    }
+
+    if (!query) return list;
     const q = query.toLowerCase();
-    return drivers.filter(
+    return list.filter(
       (r) =>
         r.name?.toLowerCase().includes(q) ||
         r.phone?.toLowerCase().includes(q) ||
         r.email?.toLowerCase().includes(q),
     );
-  }, [query, drivers]);
+  }, [query, drivers, verificationTab]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const current = filtered.slice((page - 1) * pageSize, page * pageSize);
@@ -521,6 +530,31 @@ export default function Drivers() {
             Clear
           </button>
         </div>
+      </div>
+
+      {/* Verification Tabs */}
+      <div className="bg-white rounded-xl border border-gray-200 p-2 flex gap-2">
+        {[
+          { key: "all", label: "All" },
+          { key: "pending", label: "Pending" },
+          { key: "approved", label: "Approved" },
+          { key: "cancelled", label: "Cancelled" },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => {
+              setVerificationTab(tab.key);
+              setPage(1);
+            }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              verificationTab === tab.key
+                ? "bg-orange-500 text-white"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
       {/* Search Ride ID */}
       {/* Table */}
