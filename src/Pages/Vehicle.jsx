@@ -239,6 +239,8 @@ export default function Vehicle() {
   const [types, setTypes] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     refetchResource("vehicle", "/vehicle/");
@@ -254,6 +256,9 @@ export default function Vehicle() {
     setModels(fetchedData.models || []);
     setTypes(fetchedData.types || []);
   }, [fetchedData]);
+
+  const pageCount = Math.max(1, Math.ceil(vehicles.length / pageSize));
+  const current = vehicles.slice((page - 1) * pageSize, page * pageSize);
 
   const openAdd = () => {
     setEditing(null);
@@ -325,7 +330,7 @@ export default function Vehicle() {
               </tr>
             </thead>
             <tbody>
-              {vehicles.map((r) => (
+              {current.map((r) => (
                 <tr key={r.id} className="border-t border-gray-100">
                   <td className="px-4 py-3">{r.brand_data?.name || "-"}</td>
                   <td className="px-4 py-3">{r.model_data?.name || "-"}</td>
@@ -353,7 +358,7 @@ export default function Vehicle() {
                   </td>
                 </tr>
               ))}
-              {vehicles.length === 0 && (
+              {current.length === 0 && (
                 <tr>
                   <td
                     colSpan={9}
@@ -366,6 +371,46 @@ export default function Vehicle() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {vehicles.length > 0 && (
+          <div className="flex items-center justify-center gap-2 p-4">
+            <button
+              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              «
+            </button>
+
+            {Array.from({ length: pageCount })
+              .slice(0, 5)
+              .map((_, i) => {
+                const num = i + 1;
+                return (
+                  <button
+                    key={num}
+                    onClick={() => setPage(num)}
+                    className={`px-3 py-1 rounded text-sm border ${
+                      page === num
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : "bg-white"
+                    }`}
+                  >
+                    {num}
+                  </button>
+                );
+              })}
+
+            <button
+              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              disabled={page === pageCount}
+            >
+              »
+            </button>
+          </div>
+        )}
       </div>
 
       <Modal

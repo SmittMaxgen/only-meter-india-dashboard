@@ -124,6 +124,8 @@ export default function VehicleBrand() {
   const [brand, setBrand] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     refetchResource("brands", "/brand/");
@@ -132,6 +134,9 @@ export default function VehicleBrand() {
   useEffect(() => {
     setBrand(fetchedData.brands || []);
   }, [fetchedData.brands]);
+
+  const pageCount = Math.max(1, Math.ceil(brand.length / pageSize));
+  const current = brand.slice((page - 1) * pageSize, page * pageSize);
 
   const openAdd = () => {
     setEditing(null);
@@ -186,7 +191,7 @@ export default function VehicleBrand() {
               </tr>
             </thead>
             <tbody>
-              {brand.map((r) => (
+              {current.map((r) => (
                 <tr key={r.id} className="border-t border-gray-100">
                   <td className="px-4 py-3">{r.name}</td>
                   <td className="px-4 py-3">
@@ -207,7 +212,7 @@ export default function VehicleBrand() {
                   </td>
                 </tr>
               ))}
-              {brand.length === 0 && (
+                            {current.length === 0 && (
                 <tr>
                   <td
                     colSpan={8}
@@ -220,6 +225,46 @@ export default function VehicleBrand() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {brand.length > 0 && (
+          <div className="flex items-center justify-center gap-2 p-4">
+            <button
+              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              «
+            </button>
+
+            {Array.from({ length: pageCount })
+              .slice(0, 5)
+              .map((_, i) => {
+                const num = i + 1;
+                return (
+                  <button
+                    key={num}
+                    onClick={() => setPage(num)}
+                    className={`px-3 py-1 rounded text-sm border ${
+                      page === num
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : "bg-white"
+                    }`}
+                  >
+                    {num}
+                  </button>
+                );
+              })}
+
+            <button
+              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              disabled={page === pageCount}
+            >
+              »
+            </button>
+          </div>
+        )}
       </div>
 
       <Modal
