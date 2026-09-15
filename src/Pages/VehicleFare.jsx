@@ -831,6 +831,12 @@ const isSinglePageResponse = !nextUrl && !prevUrl && fares.length === totalCount
                   Fare / KM
                 </th>
                 <th className="px-4 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide text-left">
+                  Half Fare / KM
+                </th>
+                <th className="px-4 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide text-left">
+                  Total Fare / KM
+                </th>
+                <th className="px-4 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide text-left">
                   Fare / Hour
                 </th>
                 <th className="px-4 py-3.5 font-semibold text-xs text-gray-500 uppercase tracking-wide text-left">
@@ -886,6 +892,16 @@ const isSinglePageResponse = !nextUrl && !prevUrl && fares.length === totalCount
                   <td className="px-4 py-3">
                     <span className="font-medium text-gray-800">
                       ₹{r.fare_per_km ?? "-"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="font-medium text-gray-800">
+                      ₹{r.half_fare_per_km ?? "-"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="font-medium text-gray-800">
+                      ₹{r.total_fare_per_km ?? "-"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
