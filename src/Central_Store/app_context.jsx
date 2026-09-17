@@ -292,6 +292,11 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import Swal from "sweetalert2";
 import { Navigate, Outlet } from "react-router-dom";
+import {
+  isTokenExpired,
+  clearAuthSession,
+  handleUnauthorized,
+} from "../utils/auth.js";
 
 const AppContext = createContext();
 
@@ -319,7 +324,13 @@ export const AppProvider = ({ children }) => {
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("accessToken");
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    if (!token || isTokenExpired(token)) {
+      if (localStorage.getItem("isAuth")) {
+        handleUnauthorized();
+      }
+      return {};
+    }
+    return { Authorization: `Bearer ${token}` };
   };
 
   // FormData sets its own multipart Content-Type (with boundary) — never
@@ -336,11 +347,20 @@ export const AppProvider = ({ children }) => {
   };
 
   const getData = async (endPoint) => {
-    const res = await fetch(`${baseUrl}${endPoint}`, {
-      headers: { ...getAuthHeaders() },
-    });
-    const data = await res.json();
-    return data.data;
+    try {
+      const res = await fetch(`${baseUrl}${endPoint}`, {
+        headers: { ...getAuthHeaders() },
+      });
+      if (res.status === 401 || res.status === 403) {
+        handleUnauthorized();
+        return null;
+      }
+      const data = await res.json();
+      return data.data;
+    } catch (err) {
+      console.error("getData error:", err);
+      return null;
+    }
   };
 
   const postData = async (endPoint, payload, message) => {
@@ -352,6 +372,11 @@ export const AppProvider = ({ children }) => {
         headers: { ...headers, ...getAuthHeaders() },
         body,
       });
+
+      if (res.status === 401 || res.status === 403) {
+        handleUnauthorized();
+        return;
+      }
 
       const responseData = await res.json(); // ✅ Only read once
       console.log(responseData, "this is the res of the post req");
@@ -397,6 +422,11 @@ export const AppProvider = ({ children }) => {
         headers: { ...headers, ...getAuthHeaders() },
         body,
       });
+
+      if (res.status === 401 || res.status === 403) {
+        handleUnauthorized();
+        return;
+      }
 
       const responseData = await res.json(); // ✅ Read only once
       console.log(responseData);
@@ -453,6 +483,11 @@ export const AppProvider = ({ children }) => {
           },
         });
 
+        if (res.status === 401 || res.status === 403) {
+          handleUnauthorized();
+          return;
+        }
+
         if (!res.ok) {
           const errorData = await res.json();
           throw new Error(errorData.message || "Failed to delete data");
@@ -481,6 +516,15 @@ export const AppProvider = ({ children }) => {
   };
 
   const getServicesData = async () => {
+    const isAuth = localStorage.getItem("isAuth");
+    const token = localStorage.getItem("accessToken");
+    if (!isAuth || isTokenExpired(token)) {
+      if (isAuth) {
+        handleUnauthorized();
+      }
+      return;
+    }
+
     try {
       const results = await Promise.allSettled([
         getData("/vehicle/"),
@@ -499,7 +543,7 @@ export const AppProvider = ({ children }) => {
         getData("/type/"),
         getData("/sales_agent/"),
         getData("/agent/"),
-          getData("/driver_plan_purchase/"),   
+        getData("/driver_plan_purchase/"),
       ]);
 
       const [
@@ -519,7 +563,7 @@ export const AppProvider = ({ children }) => {
         typeData,
         salesAgentData,
         agentData,
-          driverPlanPurchaseData,
+        driverPlanPurchaseData,
       ] = results.map((r) => (r.status === "fulfilled" ? r.value : []));
 
       setFetchedData((prev) => ({
@@ -540,8 +584,7 @@ export const AppProvider = ({ children }) => {
         types: typeData,
         salesAgents: salesAgentData,
         agents: agentData,
-  driverPlanPurchases: driverPlanPurchaseData,   
-
+        driverPlanPurchases: driverPlanPurchaseData,
       }));
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -572,6 +615,26 @@ export const AppProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Periodic token validity check & focus check to automatically redirect when expired
+  useEffect(() => {
+    const checkTokenExpiry = () => {
+      const isAuth = localStorage.getItem("isAuth");
+      const token = localStorage.getItem("accessToken");
+      if (isAuth && isTokenExpired(token)) {
+        handleUnauthorized();
+      }
+    };
+
+    checkTokenExpiry();
+    const interval = setInterval(checkTokenExpiry, 5000);
+    window.addEventListener("focus", checkTokenExpiry);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", checkTokenExpiry);
+    };
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
@@ -599,6 +662,12 @@ export const useAppContext = () => useContext(AppContext);
 //? make all routes private
 export const PrivateRoute = () => {
   const isAuth = localStorage.getItem("isAuth");
+  const token = localStorage.getItem("accessToken");
 
-  return isAuth ? <Outlet /> : <Navigate to="/" replace />;
+  if (!isAuth || isTokenExpired(token)) {
+    clearAuthSession();
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
 };

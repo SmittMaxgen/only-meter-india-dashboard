@@ -96,6 +96,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Logo from "../assets/Logo_1.jpg";
+import { clearAuthSession } from "../utils/auth.js";
 
 const SEARCH_MODES = {
   "driver-ride": {
@@ -130,7 +131,7 @@ export default function Topbar({ onMenuClick }) {
   const [query, setQuery] = useState("");
 
   function handleLogout() {
-    localStorage.removeItem("isAuth");
+    clearAuthSession();
     navigate("/");
   }
 

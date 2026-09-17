@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import img from "../assets/login_page.png";
 import Logo from "../assets/Logo_1.jpg";
+import { isTokenExpired, clearAuthSession } from "../utils/auth.js";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -98,13 +99,19 @@ function LoginPage() {
   }
 
   useEffect(() => {
-    if(localStorage.getItem("isAuth")) {
+    const isAuth = localStorage.getItem("isAuth");
+    const token = localStorage.getItem("accessToken");
+    if (isAuth && !isTokenExpired(token)) {
       navigate("/dashboard/home");
+    } else if (isAuth && isTokenExpired(token)) {
+      clearAuthSession();
     }
-  })
+  }, [navigate]);
 
-  if (localStorage.getItem("isAuth")) {
-  return null;
+  const isAuth = localStorage.getItem("isAuth");
+  const token = localStorage.getItem("accessToken");
+  if (isAuth && !isTokenExpired(token)) {
+    return null;
   }
 
   return (
