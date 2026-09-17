@@ -992,6 +992,11 @@ export default function DriverDetail() {
     setEditingMembership(true);
   };
 
+  const formatAddress = (address) => {
+    if (!address || !Object.keys(address).length) return "-";
+    return address.address || "-";
+  };
+
   const handleMembershipSave = async () => {
     try {
       setSavingMembership(true);
@@ -1102,14 +1107,8 @@ export default function DriverDetail() {
           <Detail label="City" value={driver.city} />
           <Detail label="State" value={driver.state} />
           <Detail label="Country" value={driver.country} />
-          <Detail
-            label="Address"
-            value={
-              driver.address && Object.keys(driver.address).length
-                ? JSON.stringify(driver.address)
-                : "-"
-            }
-          />
+          <Detail label="Address" value={formatAddress(driver.address)} />
+          <Detail label="Pincode" value={driver.address?.pincode} />
           <Detail label="Status" value={driver.status} />
           {/* <Detail label="Vehicle Type" value={driver.vehicle_type} /> */}
           {/* <Detail label="Referral Code" value={driver.referral_code} /> */}
@@ -1140,13 +1139,12 @@ export default function DriverDetail() {
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
-          {
-            driver.verification === "cancelled" &&
-                    <Detail
-            label="Cancellation Reason"
-            value={driver.cancel_reason || "-"}
-          />
-          }
+          {driver.verification === "cancelled" && (
+            <Detail
+              label="Cancellation Reason"
+              value={driver.cancel_reason || "-"}
+            />
+          )}
 
           {driver.verification === "cancelled" &&
             driver.cancellation_reason && (
@@ -1261,7 +1259,6 @@ export default function DriverDetail() {
                 )}
             </div>
           ) : (
-
             <div className="space-y-3 text-sm text-gray-700">
               <EditField label="Brand">
                 <select
