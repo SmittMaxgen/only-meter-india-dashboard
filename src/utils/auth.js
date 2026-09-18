@@ -53,6 +53,6 @@ export const clearAuthSession = () => {
 export const handleUnauthorized = () => {
   clearAuthSession();
   if (window.location.pathname !== "/") {
-    window.location.replace("/");
+    
   }
 };

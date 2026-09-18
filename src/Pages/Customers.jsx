@@ -26,6 +26,11 @@ export default function Customers() {
     role === "super_admin" ||
     role === "customer_manager" ||
     role === "drv_pls_cust";
+  const canDelete =
+    !role ||
+    (role !== "customer_manager" &&
+      role !== "driver_manager" &&
+      role !== "drv_pls_cust");
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [rideHistoryOpen, setRideHistoryOpen] = useState(false);
@@ -400,12 +405,15 @@ export default function Customers() {
                         >
                           <ClockIcon className="h-5 w-5" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(r.id)}
-                          className="text-sm px-1 text-red-600 cursor-pointer"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDelete(r.id)}
+                            className="text-sm px-1 text-red-600 cursor-pointer"
+                            title="Delete"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        )}
                       </>
                     ) : (
                       "-"

@@ -209,6 +209,13 @@ export default function DriverVehicles() {
   const [verifiedTab, setVerifiedTab] = useState("all");
   const pageSize = 10;
 
+  const role = localStorage.getItem("role");
+  const canDelete =
+    !role ||
+    (role !== "customer_manager" &&
+      role !== "driver_manager" &&
+      role !== "drv_pls_cust");
+
   useEffect(() => {
     refetchResource("driverVehicles", "/driver_vehicle/");
   }, []);
@@ -419,13 +426,15 @@ export default function DriverVehicles() {
                             <EyeIcon className="h-5 w-5" />
                           </button>
                         </Link>
-                        <button
-                          onClick={() => handleDelete(r.id)}
-                          className="text-sm px-1 text-red-600 cursor-pointer"
-                          title="Delete"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDelete(r.id)}
+                            className="text-sm px-1 text-red-600 cursor-pointer"
+                            title="Delete"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

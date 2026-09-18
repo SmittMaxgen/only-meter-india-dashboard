@@ -30,6 +30,11 @@ export default function Drivers() {
     role === "super_admin" ||
     role === "driver_manager" ||
     role === "drv_pls_cust";
+  const canDelete =
+    !role ||
+    (role !== "customer_manager" &&
+      role !== "driver_manager" &&
+      role !== "drv_pls_cust");
 
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -698,13 +703,15 @@ export default function Drivers() {
                           >
                             <ClockIcon className="h-5 w-5" />
                           </button>
-                          <button
-                            onClick={() => handleDelete(r.id)}
-                            className="text-sm text-red-600 cursor-pointer"
-                            title="Delete"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
+                          {canDelete && (
+                            <button
+                              onClick={() => handleDelete(r.id)}
+                              className="text-sm text-red-600 cursor-pointer"
+                              title="Delete"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </button>
+                          )}
                         </div>
                       ) : (
                         "-"
