@@ -719,6 +719,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAppContext } from "../Central_Store/app_context.jsx";
 import Swal from "sweetalert2";
+import DocPreview from "../CommonComponents/DocPreview.jsx";
 
 export default function DriverDetail() {
   const { id } = useParams();
@@ -1371,17 +1372,10 @@ export default function DriverDetail() {
             <Detail label="License Number" value={driver.license_no} />
             <Detail label="License Expiry Date" value={driver.license_expiry} />
             {driver.license_doc && (
-              <a
-                href={`${baseUrl}${driver.license_doc}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src={`${baseUrl}${driver.license_doc}`}
-                  alt="License"
-                  className="h-32 w-48 object-cover rounded-md border border-gray-300 cursor-pointer hover:opacity-80"
-                />
-              </a>
+              <DocPreview
+                fileUrl={driver.license_doc}
+                alt="License Document"
+              />
             )}
           </div>
         </div>
@@ -1554,17 +1548,10 @@ export default function DriverDetail() {
           <div className="space-y-2 text-sm text-gray-700">
             <Detail label="Aadhar Number" value={driver.adhar_card_number} />
             {driver.adhar_card_img && (
-              <a
-                href={`${baseUrl}${driver.adhar_card_img}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src={`${baseUrl}${driver.adhar_card_img}`}
-                  alt="Aadhar Card"
-                  className="h-32 w-48 object-cover rounded-md border border-gray-300 cursor-pointer hover:opacity-80"
-                />
-              </a>
+              <DocPreview
+                fileUrl={driver.adhar_card_img}
+                alt="Aadhar Card"
+              />
             )}
           </div>
         </div>
@@ -1574,17 +1561,10 @@ export default function DriverDetail() {
           <div className="space-y-2 text-sm text-gray-700">
             <Detail label="PAN Number" value={driver.pan_card_number} />
             {driver.pan_card_img && (
-              <a
-                href={`${baseUrl}${driver.pan_card_img}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src={`${baseUrl}${driver.pan_card_img}`}
-                  alt="PAN Card"
-                  className="h-32 w-48 object-cover rounded-md border border-gray-300 cursor-pointer hover:opacity-80"
-                />
-              </a>
+              <DocPreview
+                fileUrl={driver.pan_card_img}
+                alt="PAN Card"
+              />
             )}
           </div>
         </div>

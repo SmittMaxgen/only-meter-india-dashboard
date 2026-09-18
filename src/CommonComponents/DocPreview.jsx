@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FileText } from "lucide-react";
 import { BASE_URL } from "../config/BaseUrl"; // adjust path to your actual config file
 
@@ -14,6 +15,7 @@ const isPdfFile = (fileUrl, mimeType) => {
  * Clicking always opens the file in a new tab.
  */
 const DocPreview = ({ fileUrl, alt, mimeType }) => {
+  const [loadError, setLoadError] = useState(false);
   if (!fileUrl) return null;
 
   const isAbsolute = /^https?:\/\//i.test(fileUrl);
@@ -25,13 +27,20 @@ const DocPreview = ({ fileUrl, alt, mimeType }) => {
       className="h-40 w-64 rounded-md border border-gray-300 cursor-pointer hover:scale-105 transition-transform overflow-hidden bg-gray-100 flex flex-col items-center justify-center gap-2"
       onClick={() => window.open(fullUrl, "_blank")}
     >
-      {isPdf ? (
+      {isPdf || loadError ? (
         <>
           <FileText className="h-14 w-14 text-red-500" />
-          <span className="text-xs font-semibold text-gray-600">View PDF</span>
+          <span className="text-xs font-semibold text-gray-600">
+            {isPdf ? "View PDF" : "View Document"}
+          </span>
         </>
       ) : (
-        <img src={fullUrl} alt={alt} className="h-full w-full object-cover" />
+        <img
+          src={fullUrl}
+          alt={alt}
+          className="h-full w-full object-cover"
+          onError={() => setLoadError(true)}
+        />
       )}
     </div>
   );
